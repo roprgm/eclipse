@@ -20,12 +20,18 @@ function formatLocation(point: SelectedPoint | null) {
 	return `${point.latitude.toFixed(3)}°, ${point.longitude.toFixed(3)}°`;
 }
 
+function formatPercentage(value: number) {
+	if (value >= 99.5) return value.toFixed(0);
+	if (value >= 9.95) return value.toFixed(1);
+	return value.toFixed(2);
+}
+
 function formatCoverage(
 	sun: CelestialBodyState | null,
 	moon: CelestialBodyState | null,
 ) {
 	if (!sun || !moon) return "—";
-	return `${(calculateSolarCoverage(sun, moon) * 100).toFixed(1)}%`;
+	return `${formatPercentage(calculateSolarCoverage(sun, moon) * 100)}%`;
 }
 
 export function SceneHud() {
@@ -37,31 +43,37 @@ export function SceneHud() {
 	const coverage = formatCoverage(sun, moon);
 
 	return (
-		<header className="pointer-events-none absolute top-6 right-7 left-7 grid grid-cols-2 gap-x-8 gap-y-2 font-mono text-sm tracking-wide @max-[720px]:grid-cols-1">
-			<div className="grid content-start gap-1">
-				<p>
-					<span className="text-muted">LOC </span>
-					{location}
-				</p>
-				<time>
-					<span className="text-muted">UTC </span>
-					{formatTimestamp(timestamp)}
-				</time>
-			</div>
-			<div className="grid content-start justify-items-end gap-1 text-right @max-[720px]:justify-items-start @max-[720px]:text-left">
-				<p>
-					<span className="text-muted">SUN </span>
-					{formatBody(sun)}
-				</p>
-				<p>
-					<span className="text-muted">MOON </span>
-					{formatBody(moon)}
-				</p>
-				<p>
-					<span className="text-muted">COVER </span>
-					{coverage}
-				</p>
-			</div>
-		</header>
+		<>
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-x-0 top-0 z-10 h-40 bg-linear-to-b from-black/45 via-black/15 to-transparent"
+			/>
+			<header className="pointer-events-none absolute top-6 right-7 left-7 z-20 grid grid-cols-2 gap-x-8 gap-y-2 font-mono text-sm text-white/90 tracking-wide drop-shadow-[0_1px_1px_rgb(0_0_0/0.9)] @max-[720px]:grid-cols-1">
+				<div className="grid content-start gap-1">
+					<p>
+						<span className="text-white/55">LOC </span>
+						{location}
+					</p>
+					<time>
+						<span className="text-white/55">UTC </span>
+						{formatTimestamp(timestamp)}
+					</time>
+				</div>
+				<div className="grid content-start justify-items-end gap-1 text-right @max-[720px]:justify-items-start @max-[720px]:text-left">
+					<p>
+						<span className="text-white/55">SUN </span>
+						{formatBody(sun)}
+					</p>
+					<p>
+						<span className="text-white/55">MOON </span>
+						{formatBody(moon)}
+					</p>
+					<p>
+						<span className="text-white/55">COVER </span>
+						{coverage}
+					</p>
+				</div>
+			</header>
+		</>
 	);
 }
