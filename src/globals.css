@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root {
+	color-scheme: dark;
+	--canvas: oklch(0.14 0 0);
+	--control: oklch(0.18 0 0);
+	--control-hover: oklch(0.215 0 0);
+	--surface: oklch(0.22 0 0);
+	--elevated: oklch(0.26 0 0);
+	--text: oklch(0.95 0 0);
+	--text-muted: oklch(0.65 0 0);
+	--line: oklch(0.3 0 0);
+	--line-subtle: oklch(0.95 0 0 / 8%);
+	--line-focus: oklch(0.4 0 0);
+	--primary: oklch(0.9 0.01 0);
+	--primary-text: oklch(0.08 0 0);
+	--ring: oklch(0.5 0 0 / 10%);
+}
+
+@theme inline {
+	--color-background: var(--canvas);
+	--color-control: var(--control);
+	--color-control-hover: var(--control-hover);
+	--color-surface: var(--surface);
+	--color-elevated: var(--elevated);
+	--color-foreground: var(--text);
+	--color-muted: var(--text-muted);
+	--color-border: var(--line);
+	--color-border-subtle: var(--line-subtle);
+	--color-border-focus: var(--line-focus);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-text);
+	--color-ring: var(--ring);
+	--radius-md: 8px;
+	--text-xs: 0.8125rem;
+	--text-xs--line-height: 1.125rem;
+	--text-sm: 0.875rem;
+	--text-sm--line-height: 1.25rem;
+	--text-base: 0.875rem;
+	--text-base--line-height: 1.25rem;
+	--text-lg: 1rem;
+	--text-lg--line-height: 1.5rem;
+	--font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+@layer base {
+	* {
+		border-color: var(--line);
+	}
+	html,
+	body,
+	#root {
+		height: 100%;
+	}
+	body {
+		overflow: hidden;
+		background: var(--canvas);
+		color: var(--text);
+		font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+		font-size: var(--text-sm);
+		line-height: var(--text-sm--line-height);
+		-webkit-font-smoothing: antialiased;
+	}
+}
+
+.scroll-area {
+	overflow: hidden;
+}
+
+.scroll-area-viewport {
+	height: 100%;
+	overscroll-behavior-y: contain;
+	mask-image: linear-gradient(
+		to bottom,
+		var(--fade-start, black),
+		black 24px,
+		black calc(100% - 24px),
+		var(--fade-end, black)
+	);
+}
+
+.scroll-area[data-overflow-y-start] .scroll-area-viewport {
+	--fade-start: transparent;
+}
+.scroll-area[data-overflow-y-end] .scroll-area-viewport {
+	--fade-end: transparent;
+}
+.scroll-area[data-fade-start="false"] .scroll-area-viewport {
+	--fade-start: black;
+}
+.scroll-area-scrollbar {
+	z-index: 2;
+	display: flex;
+	width: 8px;
+	justify-content: flex-end;
+}
+.scroll-area-thumb {
+	width: 5px;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--text-muted) 40%, transparent);
+}
