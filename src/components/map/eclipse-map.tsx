@@ -1,5 +1,5 @@
 import { t } from "@/lib/i18n";
-import { DEFAULT_POINT, useStore } from "@/store";
+import { DEFAULT_POINT, type SelectedPoint, useStore } from "@/store";
 import L, { type LeafletMouseEvent } from "leaflet";
 import { useEffect, useRef } from "react";
 import { type DaylightArea, getDaylightArea } from "./daylight-area";
@@ -9,6 +9,7 @@ import {
 	TOTALITY_CENTER_LINE,
 	getEclipseCenterPosition,
 } from "./eclipse-path";
+import { MapLocationControl } from "./map-location-control";
 import "./map.css";
 
 const INITIAL_CENTER: L.LatLngExpression = [
@@ -50,6 +51,14 @@ export function EclipseMap() {
 	const timestamp = useStore((state) => state.timestamp);
 	const selectedPoint = useStore((state) => state.selectedPoint);
 	const setSelectedPoint = useStore((state) => state.setSelectedPoint);
+	const showLocation = (point: SelectedPoint) => {
+		setSelectedPoint(point);
+		const map = mapRef.current;
+		if (!map) return;
+
+		map.flyTo([point.latitude, point.longitude], Math.max(map.getZoom(), 8));
+	};
+
 	useEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;
@@ -185,12 +194,13 @@ export function EclipseMap() {
 	}, [timestamp]);
 
 	return (
-		<section aria-label={t("map")} className="map-section">
+		<section aria-label={t("map")} className="map-section relative">
 			<div
 				aria-label={t("selectObservationPoint")}
 				className="map-canvas"
 				ref={containerRef}
 			/>
+			<MapLocationControl onLocationFound={showLocation} />
 		</section>
 	);
 }
