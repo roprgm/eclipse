@@ -1,5 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="glare">
+      <stop offset="0" stop-color="#fff" />
+      <stop offset="0.35" stop-color="#fff4c7" />
+      <stop offset="1" stop-color="#fff4c7" stop-opacity="0" />
+    </radialGradient>
+  </defs>
   <circle cx="34" cy="32" r="21" fill="#f4c96b" />
-  <circle cx="30" cy="28" r="22" fill="#18181a" />
-  <circle cx="45.5" cy="43.5" r="3" fill="#fff4c7" />
+  <circle cx="31" cy="29" r="22" fill="#18181a" />
+  <circle cx="47.5" cy="45.5" r="6" fill="url(#glare)" />
 </svg>
