@@ -10,7 +10,7 @@ export type SelectedPoint = {
 };
 
 export const ECLIPSE_TIMESTAMP = Date.UTC(2026, 7, 12, 18, 29);
-export const DEFAULT_POINT: SelectedPoint = { latitude: 42, longitude: 0 };
+export const DEFAULT_POINT: SelectedPoint = { latitude: 43, longitude: -5 };
 
 type Store = {
 	timestamp: number;

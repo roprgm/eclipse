@@ -11,12 +11,21 @@ import { AutoExposure } from "./auto-exposure";
 import { CelestialDisc } from "./celestial-disc";
 import { HdrOutput } from "./hdr-output";
 import { ObserverControls } from "./observer-controls";
+import { SolarCorona } from "./solar-corona";
 import { toThreeDirection } from "./three-directions";
 
 const SUN_RENDER_DISTANCE = 100;
 const MOON_RENDER_DISTANCE = 99;
 const INITIAL_CAMERA_PITCH_OFFSET = THREE.MathUtils.degToRad(1.5);
-const SUN_COLOR = new THREE.Color(0xffd45a);
+const REFERENCE_SOLAR_ANGULAR_RADIUS = 0.00465;
+const SOLAR_IRRADIANCE = 1.25;
+const SOLAR_MEAN_RADIANCE_FACTOR = 0.8;
+const SOLAR_RADIANCE = new THREE.Color(0xffd45a).multiplyScalar(
+	SOLAR_IRRADIANCE /
+		(Math.PI *
+			REFERENCE_SOLAR_ANGULAR_RADIUS ** 2 *
+			SOLAR_MEAN_RADIANCE_FACTOR),
+);
 
 type EclipseSceneProps = {
 	autoExposure: boolean;
@@ -79,16 +88,21 @@ function Scene({ autoExposure, exposureStops }: EclipseSceneProps) {
 				/>
 			) : null}
 			<Ground />
+			<SolarCorona
+				body={sun}
+				color={SOLAR_RADIANCE}
+				distance={SUN_RENDER_DISTANCE}
+			/>
 			<CelestialDisc
 				body={sun}
-				color={SUN_COLOR}
+				color={SOLAR_RADIANCE}
 				distance={SUN_RENDER_DISTANCE}
 			/>
 			<CelestialDisc
 				body={moon}
 				color={0x000000}
 				distance={MOON_RENDER_DISTANCE}
-				toneMapped={false}
+				occludes
 			/>
 			<AutoExposure
 				enabled={autoExposure && Boolean(sun)}

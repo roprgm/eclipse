@@ -31,8 +31,6 @@ const FRAGMENT_SHADER = /* glsl */ `
 		if (coverage <= 0.0) discard;
 
 		gl_FragColor = vec4(uColor, coverage);
-		#include <tonemapping_fragment>
-		#include <colorspace_fragment>
 	}
 `;
 
@@ -40,14 +38,14 @@ type CelestialDiscProps = {
 	body: CelestialBodyState | null;
 	color: THREE.ColorRepresentation;
 	distance: number;
-	toneMapped?: boolean;
+	occludes?: boolean;
 };
 
 export function CelestialDisc({
 	body,
 	color,
 	distance,
-	toneMapped = true,
+	occludes = false,
 }: CelestialDiscProps) {
 	const uniforms = useMemo(
 		() => ({
@@ -67,14 +65,14 @@ export function CelestialDisc({
 
 	return (
 		<Billboard position={position}>
-			<mesh scale={radius}>
+			<mesh renderOrder={occludes ? -500 : 0} scale={radius}>
 				<planeGeometry args={[2, 2]} />
 				<shaderMaterial
-					depthWrite={false}
+					alphaToCoverage
+					colorWrite={!occludes}
+					depthWrite={occludes}
 					fragmentShader={FRAGMENT_SHADER}
 					side={THREE.DoubleSide}
-					toneMapped={toneMapped}
-					transparent
 					uniforms={uniforms}
 					vertexShader={VERTEX_SHADER}
 				/>

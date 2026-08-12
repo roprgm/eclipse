@@ -46,6 +46,7 @@ export function HdrOutput({ children }: HdrOutputProps) {
 		depthBuffer: true,
 		format: THREE.RGBAFormat,
 		generateMipmaps: false,
+		samples: 4,
 		stencilBuffer: false,
 		type: THREE.HalfFloatType,
 	});
