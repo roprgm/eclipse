@@ -45,6 +45,11 @@
 	stroke-opacity: 0.9;
 }
 
+.night-area {
+	fill: #020817;
+	fill-opacity: 0.58;
+}
+
 .map-sun-marker {
 	border: 0;
 	background: transparent;

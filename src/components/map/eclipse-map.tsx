@@ -1,6 +1,7 @@
 import { DEFAULT_POINT, useStore } from "@/store";
 import L, { type LeafletMouseEvent } from "leaflet";
 import { useEffect, useRef } from "react";
+import { type DaylightArea, getDaylightArea } from "./daylight-area";
 import {
 	ECLIPSE_PATH_SOURCE,
 	TOTALITY_AREA,
@@ -14,9 +15,29 @@ const INITIAL_CENTER: L.LatLngExpression = [
 	DEFAULT_POINT.longitude,
 ];
 const INITIAL_ZOOM = 2;
+const MAP_LATITUDE_LIMIT = 85.05112878;
+const WORLD_OFFSETS = [-360, 0, 360] as const;
 
 function normalizeLongitude(longitude: number) {
 	return ((((longitude + 180) % 360) + 360) % 360) - 180;
+}
+
+function getNightArea(
+	{ boundary, centerLongitude }: DaylightArea,
+	offset: number,
+) {
+	const westernEdge = centerLongitude - 180 + offset;
+	const easternEdge = centerLongitude + 180 + offset;
+
+	return [
+		[
+			[-MAP_LATITUDE_LIMIT, westernEdge],
+			[MAP_LATITUDE_LIMIT, westernEdge],
+			[MAP_LATITUDE_LIMIT, easternEdge],
+			[-MAP_LATITUDE_LIMIT, easternEdge],
+		],
+		boundary.map(([latitude, longitude]) => [latitude, longitude + offset]),
+	] satisfies L.LatLngExpression[][];
 }
 
 export function EclipseMap() {
@@ -24,6 +45,7 @@ export function EclipseMap() {
 	const mapRef = useRef<L.Map | null>(null);
 	const markerRef = useRef<L.Marker | null>(null);
 	const sunMarkerRef = useRef<L.Marker | null>(null);
+	const nightLayerRef = useRef<L.Polygon[]>([]);
 	const timestamp = useStore((state) => state.timestamp);
 	const selectedPoint = useStore((state) => state.selectedPoint);
 	const setSelectedPoint = useStore((state) => state.setSelectedPoint);
@@ -52,6 +74,16 @@ export function EclipseMap() {
 			`Eclipse: <a href="${ECLIPSE_PATH_SOURCE}">NASA/GSFC</a>`,
 		);
 
+		const daylight = getDaylightArea(useStore.getState().timestamp);
+		nightLayerRef.current = WORLD_OFFSETS.map((offset) =>
+			L.polygon(getNightArea(daylight, offset), {
+				className: "night-area",
+				fillRule: "evenodd",
+				interactive: false,
+				stroke: false,
+			}).addTo(map),
+		);
+
 		L.polygon(TOTALITY_AREA, {
 			className: "eclipse-totality-area",
 			interactive: false,
@@ -78,8 +110,17 @@ export function EclipseMap() {
 			mapRef.current = null;
 			markerRef.current = null;
 			sunMarkerRef.current = null;
+			nightLayerRef.current = [];
 		};
 	}, [setSelectedPoint]);
+
+	useEffect(() => {
+		const daylight = getDaylightArea(timestamp);
+
+		for (const [index, offset] of WORLD_OFFSETS.entries()) {
+			nightLayerRef.current[index]?.setLatLngs(getNightArea(daylight, offset));
+		}
+	}, [timestamp]);
 
 	useEffect(() => {
 		const map = mapRef.current;
