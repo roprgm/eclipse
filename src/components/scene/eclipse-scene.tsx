@@ -1,15 +1,15 @@
 import {
-	type CelestialBodyState,
 	calculateCelestialBodies,
 	calculateSolarCoverage,
 } from "@/lib/celestial-bodies";
 import { ECLIPSE_TIMESTAMP, useStore } from "@/store";
-import { Billboard } from "@react-three/drei/core/Billboard";
 import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import * as THREE from "three";
 import { Atmosphere } from "./atmosphere";
 import { AutoExposure } from "./auto-exposure";
+import { CelestialDisc } from "./celestial-disc";
+import { HdrOutput } from "./hdr-output";
 import { ObserverControls } from "./observer-controls";
 import { toThreeDirection } from "./three-directions";
 
@@ -22,41 +22,6 @@ type EclipseSceneProps = {
 	autoExposure: boolean;
 	exposureStops: number;
 };
-
-type CelestialDiscProps = {
-	body: CelestialBodyState | null;
-	color: THREE.ColorRepresentation;
-	distance: number;
-	toneMapped?: boolean;
-};
-
-function CelestialDisc({
-	body,
-	color,
-	distance,
-	toneMapped = true,
-}: CelestialDiscProps) {
-	if (!body) return null;
-
-	const position = toThreeDirection(
-		body.directionEnu,
-		new THREE.Vector3(),
-	).multiplyScalar(distance);
-	const radius = distance * Math.tan(body.angularRadiusRad);
-
-	return (
-		<Billboard position={position}>
-			<mesh scale={radius}>
-				<circleGeometry args={[1, 64]} />
-				<meshBasicMaterial
-					color={color}
-					side={THREE.DoubleSide}
-					toneMapped={toneMapped}
-				/>
-			</mesh>
-		</Billboard>
-	);
-}
 
 function Ground() {
 	return (
@@ -150,7 +115,9 @@ export function EclipseScene({
 				toneMapping: THREE.ACESFilmicToneMapping,
 			}}
 		>
-			<Scene autoExposure={autoExposure} exposureStops={exposureStops} />
+			<HdrOutput>
+				<Scene autoExposure={autoExposure} exposureStops={exposureStops} />
+			</HdrOutput>
 		</Canvas>
 	);
 }

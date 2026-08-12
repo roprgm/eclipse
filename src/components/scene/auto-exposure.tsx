@@ -4,6 +4,7 @@ import { useFBO } from "@react-three/drei/core/Fbo";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { useRadianceScene } from "./hdr-output";
 
 const METER_SIZE = 32;
 const METER_INTERVAL_MILLISECONDS = 100;
@@ -111,7 +112,7 @@ type AutoExposureProps = {
 export function AutoExposure({ enabled, exposureStops }: AutoExposureProps) {
 	const camera = useThree((state) => state.camera);
 	const renderer = useThree((state) => state.gl);
-	const scene = useThree((state) => state.scene);
+	const scene = useRadianceScene();
 	const invalidate = useThree((state) => state.invalidate);
 	const setEffectiveExposureStops = useStore(
 		(state) => state.setEffectiveExposureStops,

@@ -72,8 +72,6 @@ const FRAGMENT_SHADER = /* glsl */ `
 			daylight * uSunVisibility * sunTransmittance * scattering * 1.25;
 
 		gl_FragColor = vec4(radiance, 1.0);
-		#include <tonemapping_fragment>
-		#include <colorspace_fragment>
 	}
 `;
 
