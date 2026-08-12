@@ -1,6 +1,7 @@
 {
 	"name": "@roprgm/eclipse",
 	"private": true,
+	"license": "MIT",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
