@@ -14,6 +14,8 @@ import { FrameRate } from "./frame-rate";
 import { HdrOutput } from "./hdr-output";
 import { ObserverControls } from "./observer-controls";
 import { SolarCorona } from "./solar-corona";
+import { SolarDisc } from "./solar-disc";
+import { SolarGlare } from "./solar-glare";
 import { toThreeDirection } from "./three-directions";
 
 const SUN_RENDER_DISTANCE = 100;
@@ -37,9 +39,13 @@ type EclipseSceneProps = {
 
 function Ground() {
 	return (
-		<mesh position-y={-0.02} rotation-x={-Math.PI / 2}>
+		<mesh position-y={-0.02} renderOrder={2000} rotation-x={-Math.PI / 2}>
 			<circleGeometry args={[250, 128]} />
-			<meshBasicMaterial color={0x000000} side={THREE.DoubleSide} />
+			<meshBasicMaterial
+				color={0x000000}
+				depthFunc={THREE.AlwaysDepth}
+				side={THREE.DoubleSide}
+			/>
 		</mesh>
 	);
 }
@@ -100,11 +106,19 @@ function Scene({
 				body={sun}
 				color={SOLAR_RADIANCE}
 				distance={SUN_RENDER_DISTANCE}
+				moon={moon}
 			/>
-			<CelestialDisc
-				body={sun}
+			<SolarGlare
+				sun={sun}
+				moon={moon}
 				color={SOLAR_RADIANCE}
 				distance={SUN_RENDER_DISTANCE}
+			/>
+			<SolarDisc
+				color={SOLAR_RADIANCE}
+				distance={SUN_RENDER_DISTANCE}
+				moon={moon}
+				sun={sun}
 			/>
 			<CelestialDisc
 				body={moon}
