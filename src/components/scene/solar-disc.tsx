@@ -18,6 +18,8 @@ const FRAGMENT_SHADER = /* glsl */ `
 	varying vec2 vPosition;
 
 	uniform vec3 uColor;
+	uniform vec3 uHorizon;
+	uniform bool uHorizonClips;
 	uniform vec2 uMoonCenter;
 	uniform bool uMoonClips;
 	uniform float uMoonRadius;
@@ -25,6 +27,12 @@ const FRAGMENT_SHADER = /* glsl */ `
 
 	float visibleAt(vec2 position) {
 		if (length(position) > uSunRadius) return 0.0;
+		if (
+			uHorizonClips &&
+			dot(uHorizon.xy, position) + uHorizon.z < 0.0
+		) {
+			return 0.0;
+		}
 		if (uMoonClips && length(position - uMoonCenter) < uMoonRadius) {
 			return 0.0;
 		}
@@ -61,6 +69,7 @@ export function SolarDisc({ sun, moon, color, distance }: SolarDiscProps) {
 		if (!sun || !moon) return null;
 
 		const frame = createSolarFrame(sun, moon, distance);
+		if (sun.altitudeRad <= -sun.angularRadiusRad) return null;
 		if (frame.moonCenter.length() + frame.sunRadius <= frame.moonRadius) {
 			return null;
 		}
@@ -71,6 +80,14 @@ export function SolarDisc({ sun, moon, color, distance }: SolarDiscProps) {
 			scale: distance * angularScale,
 			uniforms: {
 				uColor: { value: new THREE.Color(color) },
+				uHorizon: {
+					value: new THREE.Vector3(
+						frame.axisX.y * angularScale,
+						frame.axisY.y * angularScale,
+						sun.directionEnu.up,
+					),
+				},
+				uHorizonClips: { value: sun.altitudeRad < sun.angularRadiusRad },
 				uMoonCenter: {
 					value: frame.moonCenter.clone().divideScalar(angularScale),
 				},
