@@ -5,7 +5,6 @@ import {
 import { isoFromStops } from "@/lib/exposure";
 import { languageTag, t } from "@/lib/i18n";
 import { type SelectedPoint, useStore } from "@/store";
-import { useState } from "react";
 
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 const LOCAL_DATE_FORMATTER = new Intl.DateTimeFormat(languageTag, {
@@ -78,10 +77,15 @@ function formatCoverage(
 
 type SceneHudProps = {
 	cameraFocalLength: number;
+	onShowUtcChange: (showUtc: boolean) => void;
+	showUtc: boolean;
 };
 
-export function SceneHud({ cameraFocalLength }: SceneHudProps) {
-	const [showUtc, setShowUtc] = useState(false);
+export function SceneHud({
+	cameraFocalLength,
+	onShowUtcChange,
+	showUtc,
+}: SceneHudProps) {
 	const timestamp = useStore((state) => state.timestamp);
 	const selectedPoint = useStore((state) => state.selectedPoint);
 	const sun = useStore((state) => state.sun);
@@ -110,7 +114,7 @@ export function SceneHud({ cameraFocalLength }: SceneHudProps) {
 					<button
 						aria-label={t(showUtc ? "showLocalTime" : "showUtcTime")}
 						className="pointer-events-auto w-fit cursor-pointer text-left hover:text-white focus-visible:text-white"
-						onClick={() => setShowUtc((current) => !current)}
+						onClick={() => onShowUtcChange(!showUtc)}
 						type="button"
 					>
 						<time dateTime={new Date(timestamp).toISOString()}>
