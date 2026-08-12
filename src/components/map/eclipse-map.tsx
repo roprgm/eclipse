@@ -16,7 +16,7 @@ const INITIAL_CENTER: L.LatLngExpression = [
 	DEFAULT_POINT.latitude,
 	DEFAULT_POINT.longitude,
 ];
-const INITIAL_ZOOM = 4;
+const INITIAL_ZOOM = 3;
 const MAP_LATITUDE_LIMIT = 85.05112878;
 const WORLD_OFFSETS = [-360, 0, 360] as const;
 
