@@ -1,19 +1,23 @@
 # 🌒 Eclipse
 
-**A Three.js interactive 3D solar eclipse renderer.**
+**An open-source, observer-based 3D solar eclipse renderer built with Three.js.**
 
-Pick a spot on the map, scrub the timeline, and watch the sky darken in real time.
+Choose a location and move through time to see an eclipse from that observer's point of view.
 
-<img width="1195" height="626" alt="Screenshot 2026-08-12 at 18 25 23" src="https://github.com/user-attachments/assets/a882dad8-0ec5-456c-8454-00c577f772a6" />
+<img width="1195" height="626" alt="Interactive 3D solar eclipse renderer showing a map and observer-based sky view" src="https://github.com/user-attachments/assets/a882dad8-0ec5-456c-8454-00c577f772a6" />
+
+[Demo](https://eclipse.roprgm.com)
 
 ## Features
 
-Eclipse combines astronomical calculations with a real-time renderer. The selected location and simulated time drive the scene, so the Sun and Moon move, scale, and overlap according to the observer rather than following a preset animation.
+Eclipse combines astronomical calculations with a real-time renderer. Location and time drive the scene, so the Sun and Moon move, scale, and overlap according to the observer rather than following a preset animation.
 
-- **Observer-based eclipse geometry.** The app calculates the apparent position and angular radius of the Sun and Moon for the selected latitude, longitude, and time. Their calculated overlap determines the solar coverage.
-- **A rendering response to totality.** The calculated discs and coverage drive the atmosphere, solar glare, corona, and exposure. As the Moon blocks the Sun, the scene loses daylight and adapts its exposure instead of simply fading to black.
-- **Automatic or manual exposure.** Auto exposure meters the rendered scene and adjusts in ISO stops. Manual mode keeps the same controls available when a fixed exposure is useful.
-- **Map, timeline, and live data.** Click the map to set an observation point, then scrub or play the timeline with second-level precision. The HUD shows the observer coordinates, UTC time, azimuth, altitude, coverage, and exposure. The map also includes NASA/GSFC's path of totality for the eclipse.
+- **Observer-based geometry.** Calculates the apparent direction and angular radius of the Sun and Moon for a latitude, longitude, and time, then derives solar coverage from their projected overlap.
+- **Real-time eclipse rendering.** Custom shaders render the solar and lunar discs, soft occlusion, corona, and glare from the calculated geometry.
+- **Physically inspired atmosphere.** Rayleigh and Mie scattering respond to the Sun's direction and visible area, allowing the sky to darken naturally as totality approaches.
+- **HDR exposure and camera controls.** The renderer meters its HDR output for automatic exposure, supports manual ISO adjustment, and models a full-frame camera with an 18–300 mm focal range.
+- **Interactive observation tools.** Select an observer on the map, use the device location, scrub or play the timeline, and inspect coordinates, local or UTC time, azimuth, altitude, coverage, exposure, and frame rate in the HUD.
+- **Bundled eclipse data.** The demo includes [NASA/GSFC's path of totality and center-line coordinates](https://eclipse.gsfc.nasa.gov/SEpath/SEpath2001/SE2026Aug12Tpath.html) for the 12 August 2026 eclipse, alongside a dynamic day-night terminator.
 
 ## Quick start
 
@@ -23,9 +27,9 @@ bun install && bun dev
 
 This project requires [Bun](https://bun.sh). Open the local URL printed by Vite after the dev server starts.
 
-## Simulation scope
+## Accuracy and scope
 
-The simulation covers the 12 August 2026 eclipse from 17:00 to 19:45 UTC. Celestial positions, apparent disc sizes, and coverage are calculated for the selected observer. The atmosphere and exposure are real-time visual models, not a prediction of weather or an exact photograph of the event.
+Celestial positions, apparent disc sizes, and coverage are calculated for the selected observer and time. The atmosphere, corona, glare, and exposure are real-time visual models, not a weather prediction or an exact photographic simulation.
 
 Also available: `bun run build`, `bun test`, and `bun run check` (Biome).
 
@@ -35,14 +39,14 @@ React 19 + TypeScript, rendered with [React Three Fiber](https://github.com/pmnd
 
 ```
 src/
-├── app.tsx               Layout: controls + map | 3D scene + timeline
+├── app.tsx               Application layout and feature composition
 ├── store.ts              Timestamp, observer location, celestial state
 ├── components/
-│   ├── scene/            R3F sky: bodies, atmosphere, auto exposure, HUD
+│   ├── scene/            Bodies, atmosphere, corona, glare, exposure, HUD
 │   ├── map/              Leaflet map + totality path data
-│   ├── controls/         Exposure and settings panel
-│   └── timeline/         Time scrubber
-└── lib/                  Ephemeris, exposure math
+│   ├── timeline/         Time scrubber
+│   └── ui/               Shared interface primitives
+└── lib/                  Ephemeris, coverage, camera, and exposure math
 ```
 
 ## License
