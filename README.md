@@ -1,6 +1,6 @@
 # 🌒 Eclipse
 
-**An interactive 3D solar eclipse renderer.**
+**A Three.js interactive 3D solar eclipse renderer.**
 
 Pick a spot on the map, scrub the timeline, and watch the sky darken in real time.
 
