@@ -9,7 +9,6 @@ import { createSolarFrame } from "./solar-frame";
 const GLARE_RADIUS = 0.008;
 const GLARE_SOFTENING = 0.00008;
 const GLARE_SCATTER = 1.5e-4;
-const TIP_ENERGY_FLOOR = 0.03;
 const CORNER_COUNT = 6;
 
 function circleIntersections(
@@ -131,7 +130,6 @@ const FRAGMENT_SHADER = /* glsl */ `
 	const float PI = 3.141592653589793;
 	const float GLARE_SOFTENING = ${GLARE_SOFTENING};
 	const float GLARE_SCATTER = ${GLARE_SCATTER};
-	const float TIP_ENERGY_FLOOR = ${TIP_ENERGY_FLOOR};
 	const float INFINITY = 1.0;
 	const float GEOMETRY_EPSILON = 1e-8;
 	const vec3 EXTINCTION =
@@ -176,30 +174,27 @@ const FRAGMENT_SHADER = /* glsl */ `
 	void considerCandidate(
 		vec2 position,
 		vec2 candidate,
-		inout float nearestDistance,
-		inout vec2 nearestSource
+		inout float nearestDistance
 	) {
 		float candidateDistance = distance(position, candidate);
 		if (candidateDistance >= nearestDistance) return;
 		nearestDistance = candidateDistance;
-		nearestSource = candidate;
 	}
 
-	float distanceToVisibleSun(vec2 position, out vec2 nearestSource) {
-		nearestSource = position;
+	float distanceToVisibleSun(vec2 position) {
 		if (isVisibleSource(position)) return 0.0;
 
 		float result = INFINITY;
 		vec2 sunCandidate = directionOrRight(position) * uSunRadius;
 		if (outsideMoon(sunCandidate) && aboveHorizon(sunCandidate)) {
-			considerCandidate(position, sunCandidate, result, nearestSource);
+			considerCandidate(position, sunCandidate, result);
 		}
 
 		if (uMoonClips) {
 			vec2 moonCandidate =
 				uMoonCenter + directionOrRight(position - uMoonCenter) * uMoonRadius;
 			if (insideSun(moonCandidate) && aboveHorizon(moonCandidate)) {
-				considerCandidate(position, moonCandidate, result, nearestSource);
+				considerCandidate(position, moonCandidate, result);
 			}
 		}
 
@@ -210,95 +205,26 @@ const FRAGMENT_SHADER = /* glsl */ `
 				horizonLengthSquared
 			);
 			if (insideSun(horizonProjection) && outsideMoon(horizonProjection)) {
-				considerCandidate(position, horizonProjection, result, nearestSource);
+				considerCandidate(position, horizonProjection, result);
 			}
 		}
 
 		for (int index = 0; index < ${CORNER_COUNT}; index += 1) {
 			if (index >= uCornerCount) break;
-			considerCandidate(position, uCorners[index], result, nearestSource);
+			considerCandidate(position, uCorners[index], result);
 		}
 		return result;
 	}
 
-	float localVisibleThickness(vec2 source) {
-		vec2 direction = directionOrRight(source);
-		float sourceRadius = length(source);
-		float innerRadius = 0.0;
-		float outerRadius = uSunRadius;
-
-		if (uMoonClips) {
-			float moonAlongRay = dot(uMoonCenter, direction);
-			float moonPerpendicularSquared =
-				dot(uMoonCenter, uMoonCenter) - moonAlongRay * moonAlongRay;
-			float halfChordSquared =
-				uMoonRadius * uMoonRadius - moonPerpendicularSquared;
-			if (halfChordSquared > 0.0) {
-				float halfChord = sqrt(halfChordSquared);
-				float moonNear = moonAlongRay - halfChord;
-				float moonFar = moonAlongRay + halfChord;
-				if (sourceRadius >= moonFar - GEOMETRY_EPSILON) {
-					innerRadius = max(innerRadius, moonFar);
-				} else if (sourceRadius <= moonNear + GEOMETRY_EPSILON) {
-					outerRadius = min(outerRadius, moonNear);
-				} else {
-					return 0.0;
-				}
-			}
-		}
-
-		if (uHorizonClips) {
-			float horizonSlope = dot(uHorizon.xy, direction);
-			if (abs(horizonSlope) <= GEOMETRY_EPSILON) {
-				if (uHorizon.z < 0.0) return 0.0;
-			} else {
-				float horizonRadius = -uHorizon.z / horizonSlope;
-				if (horizonSlope > 0.0) {
-					innerRadius = max(innerRadius, horizonRadius);
-				} else {
-					outerRadius = min(outerRadius, horizonRadius);
-				}
-			}
-		}
-
-		return max(0.0, outerRadius - innerRadius);
-	}
-
-	float filteredVisibleThickness(vec2 source) {
-		vec2 direction = directionOrRight(source);
-		vec2 tangent = vec2(-direction.y, direction.x);
-		vec2 offset = tangent * (2.0 * GLARE_SOFTENING);
-		return
-			0.5 * localVisibleThickness(source) +
-			0.25 * localVisibleThickness(source + offset) +
-			0.25 * localVisibleThickness(source - offset);
-	}
-
 	void main() {
-		vec2 nearestSource;
-		float distanceToSource = distanceToVisibleSun(vPosition, nearestSource);
+		float distanceToSource = distanceToVisibleSun(vPosition);
 		float softening = GLARE_SOFTENING;
 		float totalSourceScale = min(
 			1.0,
 			uVisibleArea / (PI * softening * softening)
 		);
-		float localSourceScale = mix(
-			TIP_ENERGY_FLOOR,
-			1.0,
-			smoothstep(
-				0.0,
-				4.0 * softening,
-				filteredVisibleThickness(nearestSource)
-			)
-		);
-		float localInfluence = 1.0 - smoothstep(
-			softening,
-			4.0 * softening,
-			distanceToSource
-		);
-		localSourceScale = mix(1.0, localSourceScale, localInfluence);
 		float inverseRadius = softening / (distanceToSource + softening);
-		float glare = GLARE_SCATTER * totalSourceScale * localSourceScale *
+		float glare = GLARE_SCATTER * totalSourceScale *
 			inverseRadius * inverseRadius;
 		float cutoff = 1.0 - smoothstep(0.006, 0.008, length(vPosition));
 		float horizonDistance = dot(uHorizon.xy, vPosition) + uHorizon.z;
