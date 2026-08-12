@@ -4,7 +4,7 @@
 
 Pick a spot on the map, scrub the timeline, and watch the sky darken in real time.
 
-<img width="1744" height="1031" alt="Screenshot 2026-08-12 at 15 21 55" src="https://github.com/user-attachments/assets/2cd3f645-1446-4b09-be03-f8eec34eb499" />
+<img width="1284" height="796" alt="Screenshot 2026-08-12 at 16 36 01" src="https://github.com/user-attachments/assets/516476cd-b67d-4dd8-b38d-5350e04ad9b4" />
 
 ## Features
 
