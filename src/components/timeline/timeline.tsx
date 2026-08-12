@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { t } from "@/lib/i18n";
 import { useStore } from "@/store";
 import {
 	Backward02Icon,
@@ -22,10 +23,10 @@ export function Timeline() {
 	const playbackSpeed = PLAYBACK_SPEEDS[speedIndex];
 	const atEnd = timestamp >= TIMELINE_END;
 	const isActivelyPlaying = isPlaying && !atEnd;
-	let playbackLabel = "Play simulation";
+	let playbackLabel = t("playSimulation");
 	let playbackIcon = PlayIcon;
 	if (isActivelyPlaying) {
-		playbackLabel = "Pause simulation";
+		playbackLabel = t("pauseSimulation");
 		playbackIcon = PauseIcon;
 	}
 
@@ -67,12 +68,12 @@ export function Timeline() {
 
 	return (
 		<section
-			aria-label="Simulation timeline"
-			className="grid grid-cols-[auto_auto_minmax(120px,1fr)] items-center gap-4 border-t bg-surface px-6"
+			aria-label={t("playbackTimeline")}
+			className="grid grid-cols-[auto_auto_minmax(100px,1fr)] items-center gap-4 border-t bg-surface px-6 max-md:gap-2 max-md:px-3"
 		>
 			<div className="flex items-center">
 				<Button
-					aria-label="Rewind 10 seconds"
+					aria-label={t("rewindTime")}
 					onClick={() => changeTime(timestamp - 10 * SECOND)}
 					size="icon"
 					variant="ghost"
@@ -98,7 +99,7 @@ export function Timeline() {
 					/>
 				</Button>
 				<Button
-					aria-label="Advance 10 seconds"
+					aria-label={t("advanceTime")}
 					onClick={() => changeTime(timestamp + 10 * SECOND)}
 					size="icon"
 					variant="ghost"
@@ -112,7 +113,7 @@ export function Timeline() {
 				</Button>
 			</div>
 			<Button
-				aria-label="Change playback speed"
+				aria-label={t("changePlaybackSpeed")}
 				className="tabular-nums"
 				onClick={() =>
 					setSpeedIndex((current) => (current + 1) % PLAYBACK_SPEEDS.length)
@@ -123,7 +124,7 @@ export function Timeline() {
 				{playbackSpeed}×
 			</Button>
 			<input
-				aria-label="Simulation time"
+				aria-label={t("simulationTime")}
 				className="w-full accent-primary"
 				max={TIMELINE_END}
 				min={TIMELINE_START}

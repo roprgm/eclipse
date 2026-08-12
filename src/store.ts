@@ -10,7 +10,10 @@ export type SelectedPoint = {
 };
 
 export const ECLIPSE_TIMESTAMP = Date.UTC(2026, 7, 12, 18, 29);
-export const DEFAULT_POINT: SelectedPoint = { latitude: 43, longitude: -5 };
+export const DEFAULT_POINT: SelectedPoint = {
+	latitude: 43,
+	longitude: -5,
+};
 
 type Store = {
 	timestamp: number;
@@ -18,10 +21,12 @@ type Store = {
 	sun: CelestialBodyState | null;
 	moon: CelestialBodyState | null;
 	effectiveExposureStops: number;
+	frameRate: number | null;
 	setTimestamp: (timestamp: number) => void;
 	setSelectedPoint: (point: SelectedPoint) => void;
 	setBodies: (bodies: CelestialBodies) => void;
 	setEffectiveExposureStops: (stops: number) => void;
+	setFrameRate: (frameRate: number) => void;
 	clearBodies: () => void;
 };
 
@@ -31,10 +36,12 @@ export const useStore = create<Store>((set) => ({
 	sun: null,
 	moon: null,
 	effectiveExposureStops: 0,
+	frameRate: null,
 	setTimestamp: (timestamp) => set({ timestamp }),
 	setSelectedPoint: (selectedPoint) => set({ selectedPoint }),
 	setBodies: ({ sun, moon }) => set({ sun, moon }),
 	setEffectiveExposureStops: (effectiveExposureStops) =>
 		set({ effectiveExposureStops }),
+	setFrameRate: (frameRate) => set({ frameRate }),
 	clearBodies: () => set({ sun: null, moon: null }),
 }));

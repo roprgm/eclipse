@@ -1,3 +1,4 @@
+import { t } from "@/lib/i18n";
 import { DEFAULT_POINT, useStore } from "@/store";
 import L, { type LeafletMouseEvent } from "leaflet";
 import { useEffect, useRef } from "react";
@@ -14,7 +15,7 @@ const INITIAL_CENTER: L.LatLngExpression = [
 	DEFAULT_POINT.latitude,
 	DEFAULT_POINT.longitude,
 ];
-const INITIAL_ZOOM = 2;
+const INITIAL_ZOOM = 4;
 const MAP_LATITUDE_LIMIT = 85.05112878;
 const WORLD_OFFSETS = [-360, 0, 360] as const;
 
@@ -49,17 +50,23 @@ export function EclipseMap() {
 	const timestamp = useStore((state) => state.timestamp);
 	const selectedPoint = useStore((state) => state.selectedPoint);
 	const setSelectedPoint = useStore((state) => state.setSelectedPoint);
-
 	useEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;
 
 		const map = L.map(container, {
 			center: INITIAL_CENTER,
+			zoomControl: false,
 			zoom: INITIAL_ZOOM,
 			worldCopyJump: true,
 		});
 		mapRef.current = map;
+		L.control
+			.zoom({
+				zoomInTitle: t("zoomIn"),
+				zoomOutTitle: t("zoomOut"),
+			})
+			.addTo(map);
 
 		L.tileLayer(
 			"https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
@@ -178,9 +185,9 @@ export function EclipseMap() {
 	}, [timestamp]);
 
 	return (
-		<section aria-label="Map" className="map-section">
+		<section aria-label={t("map")} className="map-section">
 			<div
-				aria-label="Select an observation point"
+				aria-label={t("selectObservationPoint")}
 				className="map-canvas"
 				ref={containerRef}
 			/>

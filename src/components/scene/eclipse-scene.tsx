@@ -1,3 +1,4 @@
+import { focalLengthToVerticalFov } from "@/lib/camera";
 import {
 	calculateCelestialBodies,
 	calculateSolarCoverage,
@@ -9,6 +10,7 @@ import * as THREE from "three";
 import { Atmosphere } from "./atmosphere";
 import { AutoExposure } from "./auto-exposure";
 import { CelestialDisc } from "./celestial-disc";
+import { FrameRate } from "./frame-rate";
 import { HdrOutput } from "./hdr-output";
 import { ObserverControls } from "./observer-controls";
 import { SolarCorona } from "./solar-corona";
@@ -26,10 +28,11 @@ const SOLAR_RADIANCE = new THREE.Color(0xffd45a).multiplyScalar(
 			REFERENCE_SOLAR_ANGULAR_RADIUS ** 2 *
 			SOLAR_MEAN_RADIANCE_FACTOR),
 );
-
 type EclipseSceneProps = {
 	autoExposure: boolean;
+	cameraFocalLength: number;
 	exposureStops: number;
+	onCameraFocalLengthChange: (focalLength: number) => void;
 };
 
 function Ground() {
@@ -73,7 +76,12 @@ function CameraTarget() {
 	return null;
 }
 
-function Scene({ autoExposure, exposureStops }: EclipseSceneProps) {
+function Scene({
+	autoExposure,
+	cameraFocalLength,
+	exposureStops,
+	onCameraFocalLengthChange,
+}: EclipseSceneProps) {
 	const sun = useStore((state) => state.sun);
 	const moon = useStore((state) => state.moon);
 	const sunVisibility = sun && moon ? 1 - calculateSolarCoverage(sun, moon) : 1;
@@ -109,18 +117,26 @@ function Scene({ autoExposure, exposureStops }: EclipseSceneProps) {
 				exposureStops={exposureStops}
 			/>
 			<CameraTarget />
-			<ObserverControls />
+			<ObserverControls
+				focalLength={cameraFocalLength}
+				onFocalLengthChange={onCameraFocalLengthChange}
+			/>
+			<FrameRate />
 		</>
 	);
 }
 
 export function EclipseScene({
 	autoExposure,
+	cameraFocalLength,
 	exposureStops,
+	onCameraFocalLengthChange,
 }: EclipseSceneProps) {
+	const cameraFov = focalLengthToVerticalFov(cameraFocalLength);
+
 	return (
 		<Canvas
-			camera={{ far: 1000, fov: 25, near: 0.01, position: [0, 0, 0] }}
+			camera={{ far: 1000, fov: cameraFov, near: 0.01, position: [0, 0, 0] }}
 			dpr={[1, 2]}
 			frameloop="demand"
 			gl={{
@@ -130,7 +146,12 @@ export function EclipseScene({
 			}}
 		>
 			<HdrOutput>
-				<Scene autoExposure={autoExposure} exposureStops={exposureStops} />
+				<Scene
+					autoExposure={autoExposure}
+					cameraFocalLength={cameraFocalLength}
+					exposureStops={exposureStops}
+					onCameraFocalLengthChange={onCameraFocalLengthChange}
+				/>
 			</HdrOutput>
 		</Canvas>
 	);
