@@ -30,18 +30,30 @@ type Store = {
 	clearBodies: () => void;
 };
 
-export const useStore = create<Store>((set) => ({
-	timestamp: Date.UTC(2026, 7, 12, 18, 0),
-	selectedPoint: DEFAULT_POINT,
-	sun: null,
-	moon: null,
-	effectiveExposureStops: 0,
-	frameRate: null,
-	setTimestamp: (timestamp) => set({ timestamp }),
-	setSelectedPoint: (selectedPoint) => set({ selectedPoint }),
-	setBodies: ({ sun, moon }) => set({ sun, moon }),
-	setEffectiveExposureStops: (effectiveExposureStops) =>
-		set({ effectiveExposureStops }),
-	setFrameRate: (frameRate) => set({ frameRate }),
-	clearBodies: () => set({ sun: null, moon: null }),
-}));
+const createEclipseStore = () =>
+	create<Store>((set) => ({
+		timestamp: Date.UTC(2026, 7, 12, 18, 0),
+		selectedPoint: DEFAULT_POINT,
+		sun: null,
+		moon: null,
+		effectiveExposureStops: 0,
+		frameRate: null,
+		setTimestamp: (timestamp) => set({ timestamp }),
+		setSelectedPoint: (selectedPoint) => set({ selectedPoint }),
+		setBodies: ({ sun, moon }) => set({ sun, moon }),
+		setEffectiveExposureStops: (effectiveExposureStops) =>
+			set({ effectiveExposureStops }),
+		setFrameRate: (frameRate) => set({ frameRate }),
+		clearBodies: () => set({ sun: null, moon: null }),
+	}));
+
+const getEclipseStore = (): ReturnType<typeof createEclipseStore> => {
+	if (!import.meta.hot) {
+		return createEclipseStore();
+	}
+
+	import.meta.hot.data.store ??= createEclipseStore();
+	return import.meta.hot.data.store;
+};
+
+export const useStore = getEclipseStore();
