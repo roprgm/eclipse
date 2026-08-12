@@ -4,6 +4,8 @@
 
 Pick a spot on the map, scrub the timeline, and watch the sky darken in real time.
 
+<img width="1744" height="1031" alt="Screenshot 2026-08-12 at 15 21 55" src="https://github.com/user-attachments/assets/2cd3f645-1446-4b09-be03-f8eec34eb499" />
+
 ## Features
 
 Eclipse combines astronomical calculations with a real-time renderer. The selected location and simulated time drive the scene, so the Sun and Moon move, scale, and overlap according to the observer rather than following a preset animation.
