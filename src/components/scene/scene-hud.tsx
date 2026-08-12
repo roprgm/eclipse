@@ -105,7 +105,7 @@ export function SceneHud({
 				aria-hidden="true"
 				className="pointer-events-none absolute inset-x-0 top-0 z-10 h-40 bg-linear-to-b from-black/45 via-black/15 to-transparent @max-[480px]:h-24"
 			/>
-			<header className="pointer-events-none absolute top-6 right-7 left-7 z-20 grid grid-cols-2 gap-x-8 whitespace-nowrap font-mono text-sm text-white/90 tracking-wide drop-shadow-[0_1px_1px_rgb(0_0_0/0.9)] @max-[480px]:top-3 @max-[480px]:right-3 @max-[480px]:left-3 @max-[480px]:gap-x-2 @max-[480px]:text-[10px] @max-[480px]:leading-[14px] @max-[480px]:tracking-normal @max-[360px]:text-[9px] @max-[360px]:leading-3">
+			<header className="pointer-events-none absolute top-6 right-7 left-7 z-20 grid grid-cols-2 gap-x-8 whitespace-nowrap font-mono text-sm text-white/90 tracking-wide @max-[480px]:top-3 @max-[480px]:right-3 @max-[480px]:left-3 @max-[480px]:gap-x-2 @max-[480px]:text-[10px] @max-[480px]:leading-[14px] @max-[480px]:tracking-normal @max-[360px]:text-[9px] @max-[360px]:leading-3">
 				<div className="grid content-start gap-1 @max-[480px]:gap-0">
 					<p>
 						<span className="text-white/55">{t("location")} </span>

@@ -78,7 +78,7 @@ export function Timeline({ showUtc }: TimelineProps) {
 			const currentTimestamp = useStore.getState().timestamp;
 			const nextTimestamp = Math.min(
 				TIMELINE_END,
-				currentTimestamp + (time - previousTime) * playbackSpeed * 60,
+				currentTimestamp + (time - previousTime) * playbackSpeed,
 			);
 			previousTime = time;
 			setTimestamp(nextTimestamp);
@@ -102,7 +102,7 @@ export function Timeline({ showUtc }: TimelineProps) {
 	return (
 		<section
 			aria-label={t("playbackTimeline")}
-			className="pointer-events-none absolute right-8 bottom-2 left-8 z-20 flex justify-center font-mono text-xs text-white/55 tracking-wide drop-shadow-[0_1px_1px_rgb(0_0_0/0.9)] @max-[480px]:right-3 @max-[480px]:left-3 @max-[480px]:text-[10px] @max-[480px]:tracking-normal"
+			className="pointer-events-none absolute right-8 bottom-2 left-8 z-20 flex justify-center font-mono text-xs text-white/55 tracking-wide @max-[480px]:right-3 @max-[480px]:bottom-1 @max-[480px]:left-3 @max-[480px]:text-[10px] @max-[480px]:tracking-normal"
 		>
 			<div className="pointer-events-auto grid w-full max-w-3xl grid-cols-[auto_auto_minmax(80px,1fr)] items-center gap-3 @max-[480px]:gap-2">
 				<div className="flex items-center gap-1">

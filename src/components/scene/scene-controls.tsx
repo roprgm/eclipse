@@ -105,9 +105,9 @@ export function SceneControls({
 		<>
 			<div
 				aria-hidden="true"
-				className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-black/25 backdrop-blur-[3px]"
+				className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-black/25 backdrop-blur-[3px] @max-[480px]:h-24"
 			/>
-			<div className="pointer-events-none absolute right-8 bottom-10 left-8 z-20 flex justify-center font-mono text-xs tracking-wide drop-shadow-[0_1px_1px_rgb(0_0_0/0.9)] @max-[480px]:right-3 @max-[480px]:bottom-12 @max-[480px]:left-3 @max-[480px]:text-[10px] @max-[480px]:tracking-normal">
+			<div className="pointer-events-none absolute right-8 bottom-10 left-8 z-20 flex justify-center font-mono text-xs tracking-wide @max-[480px]:right-3 @max-[480px]:bottom-10 @max-[480px]:left-3 @max-[480px]:text-[10px] @max-[480px]:tracking-normal">
 				<div className="pointer-events-auto grid w-full max-w-2xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 py-2 @max-[640px]:gap-2 @max-[640px]:py-0.5">
 					<HudRange
 						label={exposureControl.label}

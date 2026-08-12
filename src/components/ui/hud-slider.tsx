@@ -31,7 +31,7 @@ export function HudSlider({
 	return (
 		<span
 			className={cn(
-				"relative flex h-5 min-w-0 items-center has-[:focus-visible]:outline has-[:focus-visible]:outline-white/50 has-[:focus-visible]:outline-offset-2",
+				"relative flex h-5 min-w-0 items-center has-[:focus-visible]:outline has-[:focus-visible]:outline-white/50 has-[:focus-visible]:outline-offset-2 @max-[480px]:h-9",
 				marks && "h-7",
 			)}
 		>
@@ -71,7 +71,7 @@ export function HudSlider({
 			))}
 			<input
 				aria-label={label}
-				className="absolute inset-0 h-full w-full cursor-ew-resize appearance-none bg-transparent focus-visible:outline-none [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-px [&::-moz-range-thumb]:rounded-none [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white [&::-moz-range-track]:h-px [&::-moz-range-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-px [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:mt-[-5.5px] [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-px [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-white"
+				className="absolute inset-0 h-full w-full touch-none cursor-ew-resize appearance-none bg-transparent focus-visible:outline-none [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-px [&::-moz-range-thumb]:rounded-none [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white [&::-moz-range-track]:h-px [&::-moz-range-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-px [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:mt-[-5.5px] [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-px [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-white @max-[480px]:[&::-moz-range-thumb]:size-4 @max-[480px]:[&::-moz-range-thumb]:rounded-full @max-[480px]:[&::-webkit-slider-thumb]:mt-[-7.5px] @max-[480px]:[&::-webkit-slider-thumb]:size-4 @max-[480px]:[&::-webkit-slider-thumb]:rounded-full"
 				max={max}
 				min={min}
 				onChange={(event) => onChange(event.target.valueAsNumber)}
