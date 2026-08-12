@@ -4,6 +4,7 @@ import type { LatLngTuple } from "leaflet";
 const MAP_LATITUDE_LIMIT = 85.05112878;
 const SAMPLE_COUNT = 96;
 const DEGREES_PER_HOUR = 15;
+const SUNSET_ALTITUDE_DEGREES = -0.833;
 
 export type DaylightArea = {
 	boundary: LatLngTuple[];
@@ -11,9 +12,12 @@ export type DaylightArea = {
 };
 
 function getDaylightHalfWidth(latitude: number, declination: number) {
+	const latitudeRad = latitude * Astronomy.DEG2RAD;
+	const declinationRad = declination * Astronomy.DEG2RAD;
 	const hourAngleCosine =
-		-Math.tan(latitude * Astronomy.DEG2RAD) *
-		Math.tan(declination * Astronomy.DEG2RAD);
+		(Math.sin(SUNSET_ALTITUDE_DEGREES * Astronomy.DEG2RAD) -
+			Math.sin(latitudeRad) * Math.sin(declinationRad)) /
+		(Math.cos(latitudeRad) * Math.cos(declinationRad));
 
 	if (hourAngleCosine <= -1) return 180;
 	if (hourAngleCosine >= 1) return 0;
