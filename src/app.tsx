@@ -4,35 +4,54 @@ import { CelestialBodiesSync } from "@/components/scene/celestial-bodies-sync";
 import { EclipseScene } from "@/components/scene/eclipse-scene";
 import { SceneHud } from "@/components/scene/scene-hud";
 import { Timeline } from "@/components/timeline/timeline";
-import { calculateSolarCoverage } from "@/lib/celestial-bodies";
 import { useStore } from "@/store";
 import { useState } from "react";
 
-function calculateAutomaticExposure(coverage: number | null) {
-	if (coverage === null) return 0;
-	return Math.min(6, -4 - Math.log2(Math.max(1 - coverage, 1 / 1_024)));
+function getExposureStops(
+	autoExposure: boolean,
+	compensationStops: number,
+	manualIsoStops: number,
+) {
+	if (autoExposure) return compensationStops;
+	return manualIsoStops;
 }
 
 export function App() {
-	const [autoExposure, setAutoExposure] = useState(false);
-	const [exposureEv, setExposureEv] = useState(0);
-	const sun = useStore((state) => state.sun);
-	const moon = useStore((state) => state.moon);
-	let solarCoverage: number | null = null;
-	if (sun && moon) solarCoverage = calculateSolarCoverage(sun, moon);
-	let effectiveExposureEv = exposureEv;
-	if (autoExposure) {
-		effectiveExposureEv = calculateAutomaticExposure(solarCoverage);
-	}
+	const [autoExposure, setAutoExposure] = useState(true);
+	const [compensationStops, setCompensationStops] = useState(0);
+	const [manualIsoStops, setManualIsoStops] = useState(0);
+	const exposureStops = getExposureStops(
+		autoExposure,
+		compensationStops,
+		manualIsoStops,
+	);
+	const handleAutoExposureChange = (enabled: boolean) => {
+		if (enabled) {
+			setAutoExposure(true);
+			return;
+		}
+
+		setManualIsoStops(useStore.getState().effectiveExposureStops);
+		setAutoExposure(false);
+	};
+	const handleExposureChange = (stops: number) => {
+		if (autoExposure) {
+			setCompensationStops(stops);
+			return;
+		}
+
+		setManualIsoStops(stops);
+	};
+
 	return (
 		<main className="grid h-svh grid-cols-[clamp(400px,25vw,480px)_minmax(0,1fr)] max-md:grid-cols-1 max-md:grid-rows-[55svh_minmax(0,1fr)]">
 			<CelestialBodiesSync />
 			<aside className="grid min-h-0 grid-rows-[3fr_2fr] border-r bg-surface max-md:row-start-2 max-md:border-t max-md:border-r-0">
 				<ControlsPanel
 					autoExposure={autoExposure}
-					exposureEv={effectiveExposureEv}
-					onAutoExposureChange={setAutoExposure}
-					onExposureChange={setExposureEv}
+					exposureStops={exposureStops}
+					onAutoExposureChange={handleAutoExposureChange}
+					onExposureChange={handleExposureChange}
 				/>
 
 				<EclipseMap />
@@ -43,7 +62,10 @@ export function App() {
 					aria-label="Eclipse scene"
 					className="@container relative min-w-0 overflow-hidden"
 				>
-					<EclipseScene exposureEv={effectiveExposureEv} />
+					<EclipseScene
+						autoExposure={autoExposure}
+						exposureStops={exposureStops}
+					/>
 					<SceneHud />
 				</section>
 

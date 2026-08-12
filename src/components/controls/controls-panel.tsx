@@ -1,23 +1,44 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
+import { MAX_ISO_STOPS, MIN_ISO_STOPS, isoFromStops } from "@/lib/exposure";
 
 type ControlsPanelProps = {
 	autoExposure: boolean;
-	exposureEv: number;
+	exposureStops: number;
 	onAutoExposureChange: (value: boolean) => void;
 	onExposureChange: (value: number) => void;
 };
 
 function formatExposure(value: number) {
-	return `${value > 0 ? "+" : ""}${value.toFixed(1)} EV`;
+	return `${value > 0 ? "+" : ""}${value.toFixed(0)} stops`;
+}
+
+function getExposureControl(autoExposure: boolean, exposureStops: number) {
+	if (autoExposure) {
+		return {
+			label: "Exposure compensation",
+			max: 6,
+			min: -6,
+			output: formatExposure(exposureStops),
+		};
+	}
+
+	return {
+		label: "ISO",
+		max: MAX_ISO_STOPS,
+		min: MIN_ISO_STOPS,
+		output: isoFromStops(exposureStops),
+	};
 }
 
 export function ControlsPanel({
 	autoExposure,
-	exposureEv,
+	exposureStops,
 	onAutoExposureChange,
 	onExposureChange,
 }: ControlsPanelProps) {
+	const control = getExposureControl(autoExposure, exposureStops);
+
 	return (
 		<section className="flex min-h-0 flex-col border-b">
 			<header className="px-6 py-5">
@@ -36,20 +57,19 @@ export function ControlsPanel({
 					</div>
 					<label className="grid gap-2 text-sm">
 						<span className="flex justify-between">
-							Exposure
+							{control.label}
 							<output className="text-muted tabular-nums">
-								{formatExposure(exposureEv)}
+								{control.output}
 							</output>
 						</span>
 						<input
-							className="w-full accent-primary disabled:opacity-50"
-							disabled={autoExposure}
-							max={6}
-							min={-6}
+							className="w-full accent-primary"
+							max={control.max}
+							min={control.min}
 							onChange={(event) => onExposureChange(event.target.valueAsNumber)}
-							step={0.1}
+							step={1}
 							type="range"
-							value={exposureEv}
+							value={exposureStops}
 						/>
 					</label>
 				</div>

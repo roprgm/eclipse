@@ -2,6 +2,7 @@ import {
 	type CelestialBodyState,
 	calculateSolarCoverage,
 } from "@/lib/celestial-bodies";
+import { isoFromStops } from "@/lib/exposure";
 import { type SelectedPoint, useStore } from "@/store";
 
 const RADIANS_TO_DEGREES = 180 / Math.PI;
@@ -26,6 +27,10 @@ function formatPercentage(value: number) {
 	return value.toFixed(2);
 }
 
+function formatIso(stops: number) {
+	return String(isoFromStops(stops));
+}
+
 function formatCoverage(
 	sun: CelestialBodyState | null,
 	moon: CelestialBodyState | null,
@@ -39,6 +44,7 @@ export function SceneHud() {
 	const selectedPoint = useStore((state) => state.selectedPoint);
 	const sun = useStore((state) => state.sun);
 	const moon = useStore((state) => state.moon);
+	const exposureStops = useStore((state) => state.effectiveExposureStops);
 	const location = formatLocation(selectedPoint);
 	const coverage = formatCoverage(sun, moon);
 
@@ -71,6 +77,10 @@ export function SceneHud() {
 					<p>
 						<span className="text-white/55">COVER </span>
 						{coverage}
+					</p>
+					<p>
+						<span className="text-white/55">ISO </span>
+						{formatIso(exposureStops)}
 					</p>
 				</div>
 			</header>

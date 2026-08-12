@@ -17,9 +17,11 @@ type Store = {
 	selectedPoint: SelectedPoint | null;
 	sun: CelestialBodyState | null;
 	moon: CelestialBodyState | null;
+	effectiveExposureStops: number;
 	setTimestamp: (timestamp: number) => void;
 	setSelectedPoint: (point: SelectedPoint) => void;
 	setBodies: (bodies: CelestialBodies) => void;
+	setEffectiveExposureStops: (stops: number) => void;
 	clearBodies: () => void;
 };
 
@@ -28,8 +30,11 @@ export const useStore = create<Store>((set) => ({
 	selectedPoint: DEFAULT_POINT,
 	sun: null,
 	moon: null,
+	effectiveExposureStops: 0,
 	setTimestamp: (timestamp) => set({ timestamp }),
 	setSelectedPoint: (selectedPoint) => set({ selectedPoint }),
 	setBodies: ({ sun, moon }) => set({ sun, moon }),
+	setEffectiveExposureStops: (effectiveExposureStops) =>
+		set({ effectiveExposureStops }),
 	clearBodies: () => set({ sun: null, moon: null }),
 }));

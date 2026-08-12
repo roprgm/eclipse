@@ -1,22 +1,26 @@
 import {
 	type CelestialBodyState,
 	calculateCelestialBodies,
+	calculateSolarCoverage,
 } from "@/lib/celestial-bodies";
 import { ECLIPSE_TIMESTAMP, useStore } from "@/store";
 import { Billboard } from "@react-three/drei/core/Billboard";
 import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import * as THREE from "three";
+import { Atmosphere } from "./atmosphere";
+import { AutoExposure } from "./auto-exposure";
 import { ObserverControls } from "./observer-controls";
 import { toThreeDirection } from "./three-directions";
 
 const SUN_RENDER_DISTANCE = 100;
 const MOON_RENDER_DISTANCE = 99;
 const INITIAL_CAMERA_PITCH_OFFSET = THREE.MathUtils.degToRad(1.5);
-const SUN_COLOR = new THREE.Color(0xffd45a).multiplyScalar(16);
+const SUN_COLOR = new THREE.Color(0xffd45a);
 
 type EclipseSceneProps = {
-	exposureEv: number;
+	autoExposure: boolean;
+	exposureStops: number;
 };
 
 type CelestialDiscProps = {
@@ -63,18 +67,6 @@ function Ground() {
 	);
 }
 
-function Exposure({ exposureEv }: EclipseSceneProps) {
-	const renderer = useThree((state) => state.gl);
-	const invalidate = useThree((state) => state.invalidate);
-
-	useEffect(() => {
-		renderer.toneMappingExposure = 2 ** exposureEv;
-		invalidate();
-	}, [exposureEv, invalidate, renderer]);
-
-	return null;
-}
-
 function CameraTarget() {
 	const selectedPoint = useStore((state) => state.selectedPoint);
 	const camera = useThree((state) => state.camera);
@@ -107,13 +99,20 @@ function CameraTarget() {
 	return null;
 }
 
-function Scene({ exposureEv }: EclipseSceneProps) {
+function Scene({ autoExposure, exposureStops }: EclipseSceneProps) {
 	const sun = useStore((state) => state.sun);
 	const moon = useStore((state) => state.moon);
+	const sunVisibility = sun && moon ? 1 - calculateSolarCoverage(sun, moon) : 1;
 
 	return (
 		<>
 			<color args={[0x071426]} attach="background" />
+			{sun ? (
+				<Atmosphere
+					sunDirection={sun.directionEnu}
+					sunVisibility={sunVisibility}
+				/>
+			) : null}
 			<Ground />
 			<CelestialDisc
 				body={sun}
@@ -126,14 +125,20 @@ function Scene({ exposureEv }: EclipseSceneProps) {
 				distance={MOON_RENDER_DISTANCE}
 				toneMapped={false}
 			/>
-			<Exposure exposureEv={exposureEv} />
+			<AutoExposure
+				enabled={autoExposure && Boolean(sun)}
+				exposureStops={exposureStops}
+			/>
 			<CameraTarget />
 			<ObserverControls />
 		</>
 	);
 }
 
-export function EclipseScene({ exposureEv }: EclipseSceneProps) {
+export function EclipseScene({
+	autoExposure,
+	exposureStops,
+}: EclipseSceneProps) {
 	return (
 		<Canvas
 			camera={{ far: 1000, fov: 25, near: 0.01, position: [0, 0, 0] }}
@@ -145,7 +150,7 @@ export function EclipseScene({ exposureEv }: EclipseSceneProps) {
 				toneMapping: THREE.ACESFilmicToneMapping,
 			}}
 		>
-			<Scene exposureEv={exposureEv} />
+			<Scene autoExposure={autoExposure} exposureStops={exposureStops} />
 		</Canvas>
 	);
 }
