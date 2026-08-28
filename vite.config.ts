@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { wgslVitePlugin } from "vgpu/client";
 import { defineConfig, loadEnv } from "vite";
 
 function parsePort(value: string | undefined) {
@@ -19,7 +20,11 @@ export default defineConfig(({ mode }) => {
 	const port = parsePort(loadEnv(mode, process.cwd(), "PORT").PORT);
 
 	return {
-		plugins: [react(), tailwindcss()],
+		plugins: [
+			react(),
+			wgslVitePlugin(),
+			tailwindcss(),
+		],
 		resolve: {
 			alias: {
 				"@": "/src",

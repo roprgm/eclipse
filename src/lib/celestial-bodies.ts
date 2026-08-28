@@ -4,9 +4,12 @@ const KM_PER_AU = 149_597_870.7;
 const SUN_RADIUS_KM = 695_700;
 const MOON_RADIUS_KM = 1_737.4;
 
-export type CelestialInput = {
+export type ObserverLocation = {
 	latitude: number;
 	longitude: number;
+};
+
+export type CelestialInput = ObserverLocation & {
 	timestamp: Date;
 };
 
@@ -21,7 +24,6 @@ export type CelestialBodyState = {
 	angularRadiusRad: number;
 	azimuthRad: number;
 	directionEnu: LocalDirection;
-	distanceKm: number;
 };
 
 export type CelestialBodies = {
@@ -79,7 +81,6 @@ function calculateBodyState(
 		angularRadiusRad: Math.asin(bodyRadiusKm / distanceKm),
 		azimuthRad,
 		directionEnu: toLocalDirection(azimuthRad, altitudeRad),
-		distanceKm,
 	};
 }
 

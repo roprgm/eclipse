@@ -1,5 +1,6 @@
+import type { ObserverLocation } from "@/lib/celestial-bodies";
 import { t } from "@/lib/i18n";
-import { DEFAULT_POINT, type SelectedPoint, useStore } from "@/store";
+import { DEFAULT_OBSERVER_LOCATION, useStore } from "@/store";
 import L, { type LeafletMouseEvent } from "leaflet";
 import { useEffect, useRef } from "react";
 import { type DaylightArea, getDaylightArea } from "./daylight-area";
@@ -13,8 +14,8 @@ import { MapLocationControl } from "./map-location-control";
 import "./map.css";
 
 const INITIAL_CENTER: L.LatLngExpression = [
-	DEFAULT_POINT.latitude,
-	DEFAULT_POINT.longitude,
+	DEFAULT_OBSERVER_LOCATION.latitude,
+	DEFAULT_OBSERVER_LOCATION.longitude,
 ];
 const INITIAL_ZOOM = 3;
 const MAP_LATITUDE_LIMIT = 85.05112878;
@@ -50,14 +51,17 @@ export function EclipseMap() {
 	const sunMarkerRef = useRef<L.Marker | null>(null);
 	const nightLayerRef = useRef<L.Polygon[]>([]);
 	const timestamp = useStore((state) => state.timestamp);
-	const selectedPoint = useStore((state) => state.selectedPoint);
-	const setSelectedPoint = useStore((state) => state.setSelectedPoint);
-	const showLocation = (point: SelectedPoint) => {
-		setSelectedPoint(point);
+	const observerLocation = useStore((state) => state.observerLocation);
+	const setObserverLocation = useStore((state) => state.setObserverLocation);
+	const showLocation = (location: ObserverLocation) => {
+		setObserverLocation(location);
 		const map = mapRef.current;
 		if (!map) return;
 
-		map.flyTo([point.latitude, point.longitude], Math.max(map.getZoom(), 8));
+		map.flyTo(
+			[location.latitude, location.longitude],
+			Math.max(map.getZoom(), 8),
+		);
 	};
 
 	useEffect(() => {
@@ -113,23 +117,23 @@ export function EclipseMap() {
 			smoothFactor: 0,
 		}).addTo(map);
 
-		const selectPoint = ({ latlng }: LeafletMouseEvent) => {
-			setSelectedPoint({
+		const selectObserverLocation = ({ latlng }: LeafletMouseEvent) => {
+			setObserverLocation({
 				latitude: latlng.lat,
 				longitude: normalizeLongitude(latlng.lng),
 			});
 		};
-		map.on("click", selectPoint);
+		map.on("click", selectObserverLocation);
 
 		return () => {
-			map.off("click", selectPoint);
+			map.off("click", selectObserverLocation);
 			map.remove();
 			mapRef.current = null;
 			markerRef.current = null;
 			sunMarkerRef.current = null;
 			nightLayerRef.current = [];
 		};
-	}, [setSelectedPoint]);
+	}, [setObserverLocation]);
 
 	useEffect(() => {
 		const daylight = getDaylightArea(timestamp);
@@ -143,13 +147,10 @@ export function EclipseMap() {
 		const map = mapRef.current;
 		if (!map) return;
 
-		if (!selectedPoint) {
-			markerRef.current?.remove();
-			markerRef.current = null;
-			return;
-		}
-
-		const position = L.latLng(selectedPoint.latitude, selectedPoint.longitude);
+		const position = L.latLng(
+			observerLocation.latitude,
+			observerLocation.longitude,
+		);
 		if (markerRef.current) {
 			markerRef.current.setLatLng(position);
 			return;
@@ -163,7 +164,7 @@ export function EclipseMap() {
 				iconSize: [20, 20],
 			}),
 		}).addTo(map);
-	}, [selectedPoint]);
+	}, [observerLocation]);
 
 	useEffect(() => {
 		const map = mapRef.current;

@@ -1,6 +1,6 @@
 # 🌒 Eclipse
 
-**An open-source, observer-based 3D solar eclipse renderer built with Three.js.**
+**An open-source, observer-based solar eclipse renderer built with WebGPU and [vgpu](https://vgpu.sh).**
 
 Choose a location and move through time to see an eclipse from that observer's point of view.
 
@@ -25,7 +25,7 @@ Eclipse combines astronomical calculations with a real-time renderer. Location a
 bun install && bun dev
 ```
 
-This project requires [Bun](https://bun.sh). Open the local URL printed by Vite after the dev server starts.
+This project requires [Bun](https://bun.sh) and a browser with WebGPU support. Open the local URL printed by Vite after the dev server starts.
 
 ## Accuracy and scope
 
@@ -35,14 +35,14 @@ Also available: `bun run build`, `bun test`, and `bun run check` (Biome).
 
 ## How it's built
 
-React 19 + TypeScript, rendered with [React Three Fiber](https://github.com/pmndrs/react-three-fiber) on Three.js. Astronomical calculations use [astronomy-engine](https://github.com/cosinekitty/astronomy). State lives in a single small [Zustand](https://github.com/pmndrs/zustand) store; the map is [Leaflet](https://leafletjs.com); styling is Tailwind CSS 4; tooling is Vite, Bun, and Biome.
+React 19 + TypeScript, rendered as analytic fullscreen WGSL effects with [vgpu](https://vgpu.sh) on WebGPU. Astronomical calculations use [astronomy-engine](https://github.com/cosinekitty/astronomy). State lives in a single small [Zustand](https://github.com/pmndrs/zustand) store; the map is [Leaflet](https://leafletjs.com); styling is Tailwind CSS 4; tooling is Vite, Bun, and Biome.
 
 ```
 src/
 ├── app.tsx               Application layout and feature composition
 ├── store.ts              Timestamp, observer location, celestial state
 ├── components/
-│   ├── scene/            Bodies, atmosphere, corona, glare, exposure, HUD
+│   ├── scene/            WebGPU renderer, WGSL effects, camera, exposure, HUD
 │   ├── map/              Leaflet map + totality path data
 │   ├── timeline/         Time scrubber
 │   └── ui/               Shared interface primitives

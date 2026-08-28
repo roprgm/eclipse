@@ -1,54 +1,64 @@
-import type {
-	CelestialBodies,
-	CelestialBodyState,
+import {
+	type CelestialBodies,
+	type ObserverLocation,
+	calculateCelestialBodies,
 } from "@/lib/celestial-bodies";
 import { create } from "zustand";
 
-export type SelectedPoint = {
-	latitude: number;
-	longitude: number;
-};
+const INITIAL_TIMESTAMP = Date.UTC(2026, 7, 12, 18, 0);
+export const ECLIPSE_PEAK_TIMESTAMP = Date.UTC(2026, 7, 12, 18, 29);
 
-export const ECLIPSE_TIMESTAMP = Date.UTC(2026, 7, 12, 18, 29);
-export const DEFAULT_POINT: SelectedPoint = {
+export const DEFAULT_OBSERVER_LOCATION: ObserverLocation = {
 	latitude: 43,
 	longitude: -5,
 };
 
+function calculateBodies(
+	timestamp: number,
+	observerLocation: ObserverLocation,
+) {
+	return calculateCelestialBodies({
+		...observerLocation,
+		timestamp: new Date(timestamp),
+	});
+}
+
 type Store = {
 	timestamp: number;
-	selectedPoint: SelectedPoint | null;
-	sun: CelestialBodyState | null;
-	moon: CelestialBodyState | null;
+	observerLocation: ObserverLocation;
+	bodies: CelestialBodies;
 	effectiveExposureStops: number;
 	frameRate: number | null;
-	renderTime: number | null;
+	gpuTime: number | null;
 	setTimestamp: (timestamp: number) => void;
-	setSelectedPoint: (point: SelectedPoint) => void;
-	setBodies: (bodies: CelestialBodies) => void;
+	setObserverLocation: (location: ObserverLocation) => void;
 	setEffectiveExposureStops: (stops: number) => void;
 	setFrameRate: (frameRate: number) => void;
-	setRenderTime: (renderTime: number) => void;
-	clearBodies: () => void;
+	setGpuTime: (gpuTime: number) => void;
 };
 
 const createEclipseStore = () =>
 	create<Store>((set) => ({
-		timestamp: Date.UTC(2026, 7, 12, 18, 0),
-		selectedPoint: DEFAULT_POINT,
-		sun: null,
-		moon: null,
+		timestamp: INITIAL_TIMESTAMP,
+		observerLocation: DEFAULT_OBSERVER_LOCATION,
+		bodies: calculateBodies(INITIAL_TIMESTAMP, DEFAULT_OBSERVER_LOCATION),
 		effectiveExposureStops: 0,
 		frameRate: null,
-		renderTime: null,
-		setTimestamp: (timestamp) => set({ timestamp }),
-		setSelectedPoint: (selectedPoint) => set({ selectedPoint }),
-		setBodies: ({ sun, moon }) => set({ sun, moon }),
+		gpuTime: null,
+		setTimestamp: (timestamp) =>
+			set((state) => ({
+				bodies: calculateBodies(timestamp, state.observerLocation),
+				timestamp,
+			})),
+		setObserverLocation: (observerLocation) =>
+			set((state) => ({
+				bodies: calculateBodies(state.timestamp, observerLocation),
+				observerLocation,
+			})),
 		setEffectiveExposureStops: (effectiveExposureStops) =>
 			set({ effectiveExposureStops }),
 		setFrameRate: (frameRate) => set({ frameRate }),
-		setRenderTime: (renderTime) => set({ renderTime }),
-		clearBodies: () => set({ sun: null, moon: null }),
+		setGpuTime: (gpuTime) => set({ gpuTime }),
 	}));
 
 const getEclipseStore = (): ReturnType<typeof createEclipseStore> => {

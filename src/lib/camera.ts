@@ -11,18 +11,8 @@ export function clampCameraFocalLength(focalLength: number) {
 	);
 }
 
-export function focalLengthToVerticalFov(focalLength: number) {
-	return (
-		2 *
-		Math.atan(FULL_FRAME_SENSOR_HEIGHT_MM / (2 * focalLength)) *
-		(180 / Math.PI)
-	);
-}
-
-export function verticalFovToFocalLength(fov: number) {
-	return (
-		FULL_FRAME_SENSOR_HEIGHT_MM / (2 * Math.tan((fov * Math.PI) / 180 / 2))
-	);
+export function focalLengthToTanHalfFov(focalLength: number) {
+	return FULL_FRAME_SENSOR_HEIGHT_MM / (2 * focalLength);
 }
 
 export function getPinchCameraFocalLength(

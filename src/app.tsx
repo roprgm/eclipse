@@ -1,6 +1,5 @@
 import { AppHeader } from "@/components/app-header";
 import { EclipseMap } from "@/components/map/eclipse-map";
-import { CelestialBodiesSync } from "@/components/scene/celestial-bodies-sync";
 import { EclipseScene } from "@/components/scene/eclipse-scene";
 import { SceneControls } from "@/components/scene/scene-controls";
 import { SceneHud } from "@/components/scene/scene-hud";
@@ -52,7 +51,6 @@ export function App() {
 
 	return (
 		<main className="grid h-svh grid-cols-[clamp(480px,32vw,600px)_minmax(0,1fr)] max-md:grid-cols-1 max-md:grid-rows-[44svh_minmax(0,1fr)]">
-			<CelestialBodiesSync />
 			<aside className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] border-r bg-surface max-md:row-start-1 max-md:border-r-0 max-md:border-b">
 				<AppHeader />
 				<EclipseMap />
