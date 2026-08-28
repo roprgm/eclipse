@@ -17,6 +17,7 @@ import { SolarCorona } from "./solar-corona";
 import { SolarDisc } from "./solar-disc";
 import { SolarGlare } from "./solar-glare";
 import { toThreeDirection } from "./three-directions";
+import { WebGlRenderTime } from "./webgl-render-time";
 
 const SUN_RENDER_DISTANCE = 100;
 const MOON_RENDER_DISTANCE = 99;
@@ -136,6 +137,7 @@ function Scene({
 				onFocalLengthChange={onCameraFocalLengthChange}
 			/>
 			<FrameRate />
+			<WebGlRenderTime />
 		</>
 	);
 }

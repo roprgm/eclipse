@@ -22,11 +22,13 @@ type Store = {
 	moon: CelestialBodyState | null;
 	effectiveExposureStops: number;
 	frameRate: number | null;
+	renderTime: number | null;
 	setTimestamp: (timestamp: number) => void;
 	setSelectedPoint: (point: SelectedPoint) => void;
 	setBodies: (bodies: CelestialBodies) => void;
 	setEffectiveExposureStops: (stops: number) => void;
 	setFrameRate: (frameRate: number) => void;
+	setRenderTime: (renderTime: number) => void;
 	clearBodies: () => void;
 };
 
@@ -38,12 +40,14 @@ const createEclipseStore = () =>
 		moon: null,
 		effectiveExposureStops: 0,
 		frameRate: null,
+		renderTime: null,
 		setTimestamp: (timestamp) => set({ timestamp }),
 		setSelectedPoint: (selectedPoint) => set({ selectedPoint }),
 		setBodies: ({ sun, moon }) => set({ sun, moon }),
 		setEffectiveExposureStops: (effectiveExposureStops) =>
 			set({ effectiveExposureStops }),
 		setFrameRate: (frameRate) => set({ frameRate }),
+		setRenderTime: (renderTime) => set({ renderTime }),
 		clearBodies: () => set({ sun: null, moon: null }),
 	}));
 

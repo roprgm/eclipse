@@ -92,13 +92,13 @@ export function SceneHud({
 	const moon = useStore((state) => state.moon);
 	const exposureStops = useStore((state) => state.effectiveExposureStops);
 	const frameRate = useStore((state) => state.frameRate);
+	const renderTime = useStore((state) => state.renderTime);
 	const location = formatLocation(selectedPoint);
 	const coverage = formatCoverage(sun, moon);
 	const localTimestamp = formatLocalTimestamp(timestamp);
-	const framePerformance =
-		frameRate === null
-			? "—"
-			: `${Math.round(frameRate)} ${(1000 / frameRate).toFixed(2)}ms`;
+	const displayedFrameRate = frameRate === null ? "—" : Math.round(frameRate);
+	const displayedRenderTime =
+		renderTime === null ? "—" : `${renderTime.toFixed(2)}ms`;
 	const displayedTimestamp = showUtc
 		? { label: "UTC", value: formatTimestamp(timestamp) }
 		: localTimestamp;
@@ -131,7 +131,9 @@ export function SceneHud({
 						{formatIso(exposureStops)}
 						<span className="ml-4">{cameraFocalLength.toFixed(0)}mm</span>
 						<span className="ml-4 text-white/55">FPS </span>
-						{framePerformance}
+						{displayedFrameRate}
+						<span className="ml-4 text-white/55">GPU </span>
+						{displayedRenderTime}
 					</p>
 				</div>
 				<div className="grid content-start justify-items-end gap-1 text-right @max-[480px]:gap-0">
