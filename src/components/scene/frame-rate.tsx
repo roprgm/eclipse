@@ -40,9 +40,7 @@ export function FrameRate() {
 		const elapsed = now - lastSampleTime;
 		if (elapsed < UPDATE_INTERVAL_MILLISECONDS) return;
 
-		useStore
-			.getState()
-			.setFrameRate(Math.round((state.frames * 1000) / elapsed));
+		useStore.getState().setFrameRate((state.frames * 1000) / elapsed);
 		state.frames = 0;
 		state.lastSampleTime = now;
 	});
