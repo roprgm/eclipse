@@ -11,14 +11,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 
 const SECOND = 1_000;
-const TIMELINE_START = Date.UTC(2026, 7, 12, 17, 0);
-const TIMELINE_END = Date.UTC(2026, 7, 12, 19, 45);
-const TIMELINE_MARKS = [
-	TIMELINE_START,
-	Date.UTC(2026, 7, 12, 18, 0),
-	Date.UTC(2026, 7, 12, 19, 0),
-	TIMELINE_END,
-] as const;
+const HOUR = 60 * 60 * SECOND;
 const PLAYBACK_SPEEDS = [1, 2, 5, 10] as const;
 const LOCAL_TIME_FORMATTER = new Intl.DateTimeFormat(languageTag, {
 	hour: "2-digit",
@@ -40,6 +33,16 @@ function formatTimelineMark(timestamp: number, showUtc: boolean) {
 	return minute === "00" ? hour : `${hour}:${minute}`;
 }
 
+function getTimelineMarks(start: number, end: number) {
+	const firstHour = Math.ceil(start / HOUR) * HOUR;
+	const hourCount = Math.max(0, Math.ceil((end - firstHour) / HOUR));
+	const wholeHours = Array.from(
+		{ length: hourCount },
+		(_, index) => firstHour + index * HOUR,
+	).filter((timestamp) => timestamp > start && timestamp < end);
+	return [start, ...wholeHours, end];
+}
+
 type TimelineProps = {
 	showUtc: boolean;
 };
@@ -47,15 +50,19 @@ type TimelineProps = {
 export function Timeline({ showUtc }: TimelineProps) {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [speedIndex, setSpeedIndex] = useState(0);
+	const eclipse = useStore((state) => state.eclipse);
 	const timestamp = useStore((state) => state.timestamp);
 	const setTimestamp = useStore((state) => state.setTimestamp);
+	const { timelineEnd, timelineStart } = eclipse;
 	const playbackSpeed = PLAYBACK_SPEEDS[speedIndex];
-	const atEnd = timestamp >= TIMELINE_END;
+	const atEnd = timestamp >= timelineEnd;
 	const isActivelyPlaying = isPlaying && !atEnd;
-	const timelineMarks = TIMELINE_MARKS.map((value) => ({
-		label: formatTimelineMark(value, showUtc),
-		value,
-	}));
+	const timelineMarks = getTimelineMarks(timelineStart, timelineEnd).map(
+		(value) => ({
+			label: formatTimelineMark(value, showUtc),
+			value,
+		}),
+	);
 	let playbackLabel = t("playSimulation");
 	let playbackIcon = PlayIcon;
 	if (isActivelyPlaying) {
@@ -64,9 +71,7 @@ export function Timeline({ showUtc }: TimelineProps) {
 	}
 
 	const changeTime = (nextTimestamp: number) => {
-		setTimestamp(
-			Math.min(TIMELINE_END, Math.max(TIMELINE_START, nextTimestamp)),
-		);
+		setTimestamp(Math.min(timelineEnd, Math.max(timelineStart, nextTimestamp)));
 	};
 
 	useEffect(() => {
@@ -77,13 +82,13 @@ export function Timeline({ showUtc }: TimelineProps) {
 		const advance = (time: number) => {
 			const currentTimestamp = useStore.getState().timestamp;
 			const nextTimestamp = Math.min(
-				TIMELINE_END,
+				timelineEnd,
 				currentTimestamp + (time - previousTime) * playbackSpeed,
 			);
 			previousTime = time;
 			setTimestamp(nextTimestamp);
 
-			if (nextTimestamp < TIMELINE_END) {
+			if (nextTimestamp < timelineEnd) {
 				frame = requestAnimationFrame(advance);
 			} else {
 				setIsPlaying(false);
@@ -92,10 +97,10 @@ export function Timeline({ showUtc }: TimelineProps) {
 		frame = requestAnimationFrame(advance);
 
 		return () => cancelAnimationFrame(frame);
-	}, [atEnd, isPlaying, playbackSpeed, setTimestamp]);
+	}, [atEnd, isPlaying, playbackSpeed, setTimestamp, timelineEnd]);
 
 	const togglePlayback = () => {
-		if (atEnd) setTimestamp(TIMELINE_START);
+		if (atEnd) setTimestamp(timelineStart);
 		setIsPlaying(atEnd || !isPlaying);
 	};
 
@@ -159,8 +164,8 @@ export function Timeline({ showUtc }: TimelineProps) {
 				<HudSlider
 					label={t("simulationTime")}
 					marks={timelineMarks}
-					max={TIMELINE_END}
-					min={TIMELINE_START}
+					max={timelineEnd}
+					min={timelineStart}
 					onChange={changeTime}
 					showProgress
 					step={SECOND}

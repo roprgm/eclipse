@@ -2,7 +2,7 @@
 
 **An open-source, observer-based solar eclipse renderer built with WebGPU and [vgpu](https://vgpu.sh).**
 
-Choose a location and move through time to see an eclipse from that observer's point of view.
+Choose an eclipse and observation point, then move through time to see it from that observer's point of view.
 
 <img width="1195" height="626" alt="Interactive 3D solar eclipse renderer showing a map and observer-based sky view" src="https://github.com/user-attachments/assets/a882dad8-0ec5-456c-8454-00c577f772a6" />
 
@@ -17,7 +17,7 @@ Eclipse combines astronomical calculations with a real-time renderer. Location a
 - **Physically inspired atmosphere.** Rayleigh and Mie scattering respond to the Sun's direction and visible area, allowing the sky to darken naturally as totality approaches.
 - **HDR exposure and camera controls.** The renderer meters its HDR output for automatic exposure, supports manual ISO adjustment, and models a full-frame camera with an 18–300 mm focal range.
 - **Interactive observation tools.** Select an observer on the map, use the device location, scrub or play the timeline, and inspect coordinates, local or UTC time, azimuth, altitude, coverage, exposure, and frame rate in the HUD.
-- **Bundled eclipse data.** The demo includes [NASA/GSFC's path of totality and center-line coordinates](https://eclipse.gsfc.nasa.gov/SEpath/SEpath2001/SE2026Aug12Tpath.html) for the 12 August 2026 eclipse, alongside a dynamic day-night terminator.
+- **Three solar eclipses.** Explore the total eclipses of 12 August 2026 and 2 August 2027, or the annular eclipse of 6 February 2027. Their NASA/GSFC central-path data is bundled alongside a dynamic day-night terminator.
 
 ## Quick start
 
@@ -46,7 +46,7 @@ src/
 │   ├── map/              Leaflet map + totality path data
 │   ├── timeline/         Time scrubber
 │   └── ui/               Shared interface primitives
-└── lib/                  Ephemeris, coverage, camera, and exposure math
+└── lib/                  Eclipse catalog, ephemeris, camera, and exposure math
 ```
 
 ## License
