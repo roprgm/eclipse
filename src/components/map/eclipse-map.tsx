@@ -1,21 +1,16 @@
 import type { ObserverLocation } from "@/lib/celestial-bodies";
+import { ECLIPSES, getEclipseCenterPosition } from "@/lib/eclipses";
 import { t } from "@/lib/i18n";
-import { DEFAULT_OBSERVER_LOCATION, useStore } from "@/store";
+import { useStore } from "@/store";
 import L, { type LeafletMouseEvent } from "leaflet";
 import { useEffect, useRef } from "react";
 import { type DaylightArea, getDaylightArea } from "./daylight-area";
-import {
-	ECLIPSE_PATH_SOURCE,
-	TOTALITY_AREA,
-	TOTALITY_CENTER_LINE,
-	getEclipseCenterPosition,
-} from "./eclipse-path";
 import { MapLocationControl } from "./map-location-control";
 import "./map.css";
 
 const INITIAL_CENTER: L.LatLngExpression = [
-	DEFAULT_OBSERVER_LOCATION.latitude,
-	DEFAULT_OBSERVER_LOCATION.longitude,
+	ECLIPSES[0].defaultLocation.latitude,
+	ECLIPSES[0].defaultLocation.longitude,
 ];
 const INITIAL_ZOOM = 3;
 const MAP_LATITUDE_LIMIT = 85.05112878;
@@ -50,6 +45,9 @@ export function EclipseMap() {
 	const markerRef = useRef<L.Marker | null>(null);
 	const sunMarkerRef = useRef<L.Marker | null>(null);
 	const nightLayerRef = useRef<L.Polygon[]>([]);
+	const eclipseLayerRef = useRef<L.LayerGroup | null>(null);
+	const eclipseAttributionRef = useRef<string | null>(null);
+	const eclipse = useStore((state) => state.eclipse);
 	const timestamp = useStore((state) => state.timestamp);
 	const observerLocation = useStore((state) => state.observerLocation);
 	const setObserverLocation = useStore((state) => state.setObserverLocation);
@@ -91,10 +89,6 @@ export function EclipseMap() {
 				subdomains: "abcd",
 			},
 		).addTo(map);
-		map.attributionControl.addAttribution(
-			`Eclipse: <a href="${ECLIPSE_PATH_SOURCE}">NASA/GSFC</a>`,
-		);
-
 		const daylight = getDaylightArea(useStore.getState().timestamp);
 		nightLayerRef.current = WORLD_OFFSETS.map((offset) =>
 			L.polygon(getNightArea(daylight, offset), {
@@ -104,18 +98,6 @@ export function EclipseMap() {
 				stroke: false,
 			}).addTo(map),
 		);
-
-		L.polygon(TOTALITY_AREA, {
-			className: "eclipse-totality-area",
-			interactive: false,
-			smoothFactor: 0,
-			stroke: false,
-		}).addTo(map);
-		L.polyline(TOTALITY_CENTER_LINE, {
-			className: "eclipse-center-line",
-			interactive: false,
-			smoothFactor: 0,
-		}).addTo(map);
 
 		const selectObserverLocation = ({ latlng }: LeafletMouseEvent) => {
 			setObserverLocation({
@@ -132,8 +114,41 @@ export function EclipseMap() {
 			markerRef.current = null;
 			sunMarkerRef.current = null;
 			nightLayerRef.current = [];
+			eclipseLayerRef.current = null;
+			eclipseAttributionRef.current = null;
 		};
 	}, [setObserverLocation]);
+
+	useEffect(() => {
+		const map = mapRef.current;
+		if (!map) return;
+
+		eclipseLayerRef.current?.remove();
+		if (eclipseAttributionRef.current) {
+			map.attributionControl.removeAttribution(eclipseAttributionRef.current);
+		}
+
+		eclipseLayerRef.current = L.layerGroup([
+			L.polygon(eclipse.path.area, {
+				className: "eclipse-central-area",
+				interactive: false,
+				smoothFactor: 0,
+				stroke: false,
+			}),
+			L.polyline(eclipse.path.centerLine, {
+				className: "eclipse-center-line",
+				interactive: false,
+				smoothFactor: 0,
+			}),
+		]).addTo(map);
+		const attribution = `Eclipse: <a href="${eclipse.path.source}">NASA/GSFC</a>`;
+		map.attributionControl.addAttribution(attribution);
+		eclipseAttributionRef.current = attribution;
+		map.flyTo(
+			[eclipse.defaultLocation.latitude, eclipse.defaultLocation.longitude],
+			INITIAL_ZOOM,
+		);
+	}, [eclipse]);
 
 	useEffect(() => {
 		const daylight = getDaylightArea(timestamp);
@@ -170,7 +185,7 @@ export function EclipseMap() {
 		const map = mapRef.current;
 		if (!map) return;
 
-		const position = getEclipseCenterPosition(timestamp);
+		const position = getEclipseCenterPosition(eclipse.path, timestamp);
 		if (!position) {
 			sunMarkerRef.current?.remove();
 			sunMarkerRef.current = null;
@@ -193,7 +208,7 @@ export function EclipseMap() {
 			keyboard: false,
 			zIndexOffset: 500,
 		}).addTo(map);
-	}, [timestamp]);
+	}, [eclipse.path, timestamp]);
 
 	return (
 		<section aria-label={t("map")} className="map-section relative">

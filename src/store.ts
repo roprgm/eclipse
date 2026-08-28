@@ -3,15 +3,10 @@ import {
 	type ObserverLocation,
 	calculateCelestialBodies,
 } from "@/lib/celestial-bodies";
+import { ECLIPSES, type SolarEclipse } from "@/lib/eclipses";
 import { create } from "zustand";
 
-const INITIAL_TIMESTAMP = Date.UTC(2026, 7, 12, 18, 0);
-export const ECLIPSE_PEAK_TIMESTAMP = Date.UTC(2026, 7, 12, 18, 29);
-
-export const DEFAULT_OBSERVER_LOCATION: ObserverLocation = {
-	latitude: 43,
-	longitude: -5,
-};
+const INITIAL_ECLIPSE = ECLIPSES[0];
 
 function calculateBodies(
 	timestamp: number,
@@ -24,12 +19,14 @@ function calculateBodies(
 }
 
 type Store = {
+	eclipse: SolarEclipse;
 	timestamp: number;
 	observerLocation: ObserverLocation;
 	bodies: CelestialBodies;
 	effectiveExposureStops: number;
 	frameRate: number | null;
 	gpuTime: number | null;
+	selectEclipse: (eclipse: SolarEclipse) => void;
 	setTimestamp: (timestamp: number) => void;
 	setObserverLocation: (location: ObserverLocation) => void;
 	setEffectiveExposureStops: (stops: number) => void;
@@ -39,12 +36,26 @@ type Store = {
 
 const createEclipseStore = () =>
 	create<Store>((set) => ({
-		timestamp: INITIAL_TIMESTAMP,
-		observerLocation: DEFAULT_OBSERVER_LOCATION,
-		bodies: calculateBodies(INITIAL_TIMESTAMP, DEFAULT_OBSERVER_LOCATION),
+		eclipse: INITIAL_ECLIPSE,
+		timestamp: INITIAL_ECLIPSE.initialTimestamp,
+		observerLocation: INITIAL_ECLIPSE.defaultLocation,
+		bodies: calculateBodies(
+			INITIAL_ECLIPSE.initialTimestamp,
+			INITIAL_ECLIPSE.defaultLocation,
+		),
 		effectiveExposureStops: 0,
 		frameRate: null,
 		gpuTime: null,
+		selectEclipse: (eclipse) =>
+			set({
+				bodies: calculateBodies(
+					eclipse.initialTimestamp,
+					eclipse.defaultLocation,
+				),
+				eclipse,
+				observerLocation: eclipse.defaultLocation,
+				timestamp: eclipse.initialTimestamp,
+			}),
 		setTimestamp: (timestamp) =>
 			set((state) => ({
 				bodies: calculateBodies(timestamp, state.observerLocation),

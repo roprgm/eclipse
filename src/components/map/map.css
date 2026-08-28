@@ -39,7 +39,7 @@
 	color: var(--text);
 }
 
-.eclipse-totality-area {
+.eclipse-central-area {
 	fill: color-mix(in oklab, var(--primary) 18%, transparent);
 	fill-opacity: 1;
 }

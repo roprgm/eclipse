@@ -56,6 +56,7 @@ export function EclipseScene({
 	onCameraFocalLengthChange,
 }: EclipseSceneProps) {
 	const bodies = useStore((state) => state.bodies);
+	const peakTimestamp = useStore((state) => state.eclipse.peakTimestamp);
 	const observerLocation = useStore((state) => state.observerLocation);
 	const [status, setStatus] = useState<RendererStatus>({ kind: "loading" });
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -68,6 +69,7 @@ export function EclipseScene({
 		cameraFocalLength,
 		exposureStops,
 		observerLocation,
+		peakTimestamp,
 	};
 	const latestInputRef = useRef(rendererInput);
 	latestInputRef.current = rendererInput;

@@ -5,7 +5,6 @@ import {
 	calculateCelestialBodies,
 	calculateSolarCoverage,
 } from "@/lib/celestial-bodies";
-import { ECLIPSE_PEAK_TIMESTAMP } from "@/store";
 import {
 	type Gpu,
 	VGPUError,
@@ -40,6 +39,7 @@ export type EclipseRendererInput = {
 	cameraFocalLength: number;
 	exposureStops: number;
 	observerLocation: ObserverLocation;
+	peakTimestamp: number;
 };
 
 type EclipseRendererCallbacks = {
@@ -81,10 +81,13 @@ function toBodiesUniform(bodies: CelestialBodies) {
 	};
 }
 
-function calculatePeakDirection(location: ObserverLocation): LocalDirection {
+function calculatePeakDirection(
+	location: ObserverLocation,
+	peakTimestamp: number,
+): LocalDirection {
 	const { sun, moon } = calculateCelestialBodies({
 		...location,
-		timestamp: new Date(ECLIPSE_PEAK_TIMESTAMP),
+		timestamp: new Date(peakTimestamp),
 	});
 	const east = sun.directionEnu.east + moon.directionEnu.east;
 	const north = sun.directionEnu.north + moon.directionEnu.north;
@@ -168,6 +171,7 @@ function createRendererRuntime(
 	let lastMeteredAt = Number.NEGATIVE_INFINITY;
 	let currentBodies = initialInput.bodies;
 	let currentLocation = initialInput.observerLocation;
+	let currentPeakTimestamp = initialInput.peakTimestamp;
 	let hasRendered = false;
 	const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 	exposure.setReducedMotion(reducedMotion.matches);
@@ -189,7 +193,12 @@ function createRendererRuntime(
 		onFocalLengthChange: callbacks.onCameraFocalLengthChange,
 		onViewChange: updateCameraView,
 	});
-	camera.setTarget(calculatePeakDirection(initialInput.observerLocation));
+	camera.setTarget(
+		calculatePeakDirection(
+			initialInput.observerLocation,
+			initialInput.peakTimestamp,
+		),
+	);
 
 	function scheduleMeterFrame(now: number) {
 		if (
@@ -314,9 +323,15 @@ function createRendererRuntime(
 			meterNeedsUpdate = true;
 		}
 
-		if (input.observerLocation !== currentLocation) {
+		if (
+			input.observerLocation !== currentLocation ||
+			input.peakTimestamp !== currentPeakTimestamp
+		) {
 			currentLocation = input.observerLocation;
-			camera.setTarget(calculatePeakDirection(input.observerLocation));
+			currentPeakTimestamp = input.peakTimestamp;
+			camera.setTarget(
+				calculatePeakDirection(input.observerLocation, input.peakTimestamp),
+			);
 		}
 		requestFrame();
 	}
