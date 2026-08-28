@@ -1,10 +1,11 @@
 import {
 	type CelestialBodyState,
+	type ObserverLocation,
 	calculateSolarCoverage,
 } from "@/lib/celestial-bodies";
 import { isoFromStops } from "@/lib/exposure";
 import { languageTag, t } from "@/lib/i18n";
-import { type SelectedPoint, useStore } from "@/store";
+import { useStore } from "@/store";
 
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 const LOCAL_DATE_FORMATTER = new Intl.DateTimeFormat(languageTag, {
@@ -47,14 +48,12 @@ function formatLocalTimestamp(timestamp: number) {
 	};
 }
 
-function formatBody(body: CelestialBodyState | null) {
-	if (!body) return "—";
+function formatBody(body: CelestialBodyState) {
 	return `AZ ${(body.azimuthRad * RADIANS_TO_DEGREES).toFixed(1)}° ALT ${(body.altitudeRad * RADIANS_TO_DEGREES).toFixed(1)}°`;
 }
 
-function formatLocation(point: SelectedPoint | null) {
-	if (!point) return "—";
-	return `${point.latitude.toFixed(3)}°, ${point.longitude.toFixed(3)}°`;
+function formatLocation(location: ObserverLocation) {
+	return `${location.latitude.toFixed(3)}°, ${location.longitude.toFixed(3)}°`;
 }
 
 function formatPercentage(value: number) {
@@ -63,15 +62,7 @@ function formatPercentage(value: number) {
 	return value.toFixed(2);
 }
 
-function formatIso(stops: number) {
-	return String(isoFromStops(stops));
-}
-
-function formatCoverage(
-	sun: CelestialBodyState | null,
-	moon: CelestialBodyState | null,
-) {
-	if (!sun || !moon) return "—";
+function formatCoverage(sun: CelestialBodyState, moon: CelestialBodyState) {
 	return `${formatPercentage(calculateSolarCoverage(sun, moon) * 100)}%`;
 }
 
@@ -87,18 +78,16 @@ export function SceneHud({
 	showUtc,
 }: SceneHudProps) {
 	const timestamp = useStore((state) => state.timestamp);
-	const selectedPoint = useStore((state) => state.selectedPoint);
-	const sun = useStore((state) => state.sun);
-	const moon = useStore((state) => state.moon);
+	const observerLocation = useStore((state) => state.observerLocation);
+	const bodies = useStore((state) => state.bodies);
 	const exposureStops = useStore((state) => state.effectiveExposureStops);
 	const frameRate = useStore((state) => state.frameRate);
-	const renderTime = useStore((state) => state.renderTime);
-	const location = formatLocation(selectedPoint);
-	const coverage = formatCoverage(sun, moon);
+	const gpuTime = useStore((state) => state.gpuTime);
+	const location = formatLocation(observerLocation);
+	const coverage = formatCoverage(bodies.sun, bodies.moon);
 	const localTimestamp = formatLocalTimestamp(timestamp);
 	const displayedFrameRate = frameRate === null ? "—" : Math.round(frameRate);
-	const displayedRenderTime =
-		renderTime === null ? "—" : `${renderTime.toFixed(2)}ms`;
+	const displayedGpuTime = gpuTime === null ? "—" : `${gpuTime.toFixed(2)}ms`;
 	const displayedTimestamp = showUtc
 		? { label: "UTC", value: formatTimestamp(timestamp) }
 		: localTimestamp;
@@ -128,22 +117,22 @@ export function SceneHud({
 					</button>
 					<p>
 						<span className="text-white/55">ISO </span>
-						{formatIso(exposureStops)}
+						{isoFromStops(exposureStops)}
 						<span className="ml-4">{cameraFocalLength.toFixed(0)}mm</span>
 						<span className="ml-4 text-white/55">FPS </span>
 						{displayedFrameRate}
 						<span className="ml-4 text-white/55">GPU </span>
-						{displayedRenderTime}
+						{displayedGpuTime}
 					</p>
 				</div>
 				<div className="grid content-start justify-items-end gap-1 text-right @max-[480px]:gap-0">
 					<p>
 						<span className="text-white/55">{t("sun")} </span>
-						{formatBody(sun)}
+						{formatBody(bodies.sun)}
 					</p>
 					<p>
 						<span className="text-white/55">{t("moon")} </span>
-						{formatBody(moon)}
+						{formatBody(bodies.moon)}
 					</p>
 					<p>
 						<span className="text-white/55">{t("coverage")} </span>

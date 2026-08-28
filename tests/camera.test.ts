@@ -3,7 +3,7 @@ import {
 	MAX_CAMERA_FOCAL_LENGTH,
 	MIN_CAMERA_FOCAL_LENGTH,
 	clampCameraFocalLength,
-	focalLengthToVerticalFov,
+	focalLengthToTanHalfFov,
 	getPinchCameraFocalLength,
 } from "../src/lib/camera";
 
@@ -13,9 +13,9 @@ describe("camera focal length", () => {
 		expect(clampCameraFocalLength(400)).toBe(MAX_CAMERA_FOCAL_LENGTH);
 	});
 
-	test("converts a full-frame focal length to vertical field of view", () => {
-		expect(focalLengthToVerticalFov(18)).toBeCloseTo(67.38, 2);
-		expect(focalLengthToVerticalFov(300)).toBeCloseTo(4.58, 2);
+	test("converts focal length to the shader's half-FOV tangent", () => {
+		expect(focalLengthToTanHalfFov(18)).toBeCloseTo(2 / 3, 12);
+		expect(focalLengthToTanHalfFov(300)).toBeCloseTo(0.04, 12);
 	});
 
 	test("zooms in when fingers spread and out when they close", () => {

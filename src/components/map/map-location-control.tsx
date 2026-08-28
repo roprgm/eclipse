@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
+import type { ObserverLocation } from "@/lib/celestial-bodies";
 import { t } from "@/lib/i18n";
-import type { SelectedPoint } from "@/store";
 import { Gps01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { useState } from "react";
 type LocationStatus = "idle" | "loading" | "error";
 
 type MapLocationControlProps = {
-	onLocationFound: (point: SelectedPoint) => void;
+	onLocationFound: (location: ObserverLocation) => void;
 };
 
 export function MapLocationControl({
